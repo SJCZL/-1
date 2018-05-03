@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html>
+
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+		<title></title>
+		<link href="../css/mui.min.css" rel="stylesheet" />
+		<style type="text/css">
+			.mui-btn {
+				width: 100%;
+			}
+			
+			.mui-icon-checkbox {
+				color: red;
+				margin-top: 10px;
+				vertical-align: middle;
+			}
+			
+			.mui-icon-close-filled {
+				/*color: #C60B02;*/
+				/*color: #C60A00;*/
+				color: #CF2D28;
+				vertical-align: middle;
+				margin-top: 10px;
+			}
+			
+			.mui-icon-close-filled {
+				vertical-align: middle;
+			}
+		</style>
+	</head>
+
+	<body>
+		<header class="mui-bar mui-bar-nav">
+			<a class="mui-action-back mui-icon mui-icon-left-nav mui-pull-left"></a>
+			<h1 class="mui-title">选择乘客</h1>
+		</header>
+
+		<div class="mui-content">
+			<!--
+        		
+        		描述：暂时不需要,添加乘客
+        	-->
+
+			<!--<div class="mui-content-padded" align="center">
+		      	<button id="add" type="button" class="mui-btn mui-icon mui-icon-plusempty mui-btn-blue" >添加乘客</button>
+	   		</div>-->
+
+			<!--
+    			
+    			描述：显示从获取所有可选乘客信息getPassenger.do接口的数据
+    		-->
+
+			<div class="mui-card" style="margin-top: 10px;">
+				<form class="mui-input-group" id="passengerMessages">
+					<!--<div class="mui-input-row mui-checkbox" style="height: 50%;margin-top: 10px;">
+						<label>
+							<p>张三&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;成人票</p>
+		        			<p>身份证&nbsp;&nbsp;456255622132862123</p>
+						</label>
+						<input name="checkbox1" value="Item 3" type="checkbox">
+					</div>
+					<div class="mui-input-row mui-checkbox">
+						<label>checked：true</label>
+						<input name="checkbox1" value="Item 4" type="checkbox" checked>
+					</div>
+					<div class="mui-input-row mui-checkbox mui-disabled">
+						<label>disabled checkbox</label>
+						<input name="checkbox1" type="checkbox" disabled="disabled">
+					</div>-->
+				</form>
+			</div>
+
+			<!--
+    			
+    			描述：确定按钮的上下距离需要调整
+    		-->
+			<div align="center" style="margin: 12px 12px;">
+				<button id="sure" type="button" class="mui-btn mui-btn-blue" style="font-size: 100%;">确定</button>
+			</div>
+
+		</div>
+
+		<script src="../js/own.js" charset="UTF-8"></script>
+		<script src="../js/mui.min.js "></script>
+		<script type="text/javascript" charset="UTF-8">
+			mui.init({
+				swipeBack: true //启用右滑关闭功能
+			});
+			
+			var self;
+			var messages;                   // Janine:UL乘客信息显示
+			var sureButton;
+
+			mui.plusReady(function() {
+
+				// Janine:暂不添加“添加乘客”的按钮,因为接口还没理好
+//    			var addButton = document.getElementById("add");        // 添加乘客的按钮
+//          	// 添加乘客信息
+//    	    	addButton.addEventListener('tap',function(){
+//					mui.openWindow({
+//						url:'addPassenger.html',
+//						id:'addPassenger.html',
+//					});
+//				});
+				
+				self = plus.webview.currentWebview();
+				
+				// Janine:获取确认按钮
+				sureButton = document.getElementById("sure");
+
+				// Janine:本来应该在该界面获取信息的，但是由于请求时间问题，将该请求放到了上一界面执行
+				message = self.message;              // 获取json数据
+				var arr = message.data.normal_passengers;  // 获取json数据中乘车人的数据数组
+
+				// Janine:将上一届面传来的信息设置到页面上
+				messageList(arr.length);
+
+				// Janine:确定按钮的点击事件
+				sureButton.addEventListener('tap', function() {
+
+					// Janine:获取input标签中的checkbox
+					var chks = document.getElementsByTagName('input');
+					
+					var bl = true;
+					
+					var checkpass = new Array(); // 定义数组存放已选乘客信息
+					var length = chks.length - 1;
+					
+					var j = 0
+					for(var i = 0; i <= length; i++) {
+						if(chks[i].checked) {
+							bl = false;
+							checkpass[j] = {
+								name: "null",
+								type_name: "null",
+								id_type_name: "null",
+								id_no: "null",
+								all: "null"
+							};
+							checkpass[j].name = message.data.normal_passengers[i].passenger_name;
+							checkpass[j].type_name = message.data.normal_passengers[i].passenger_type_name;
+							checkpass[j].id_type_name = message.data.normal_passengers[i].passenger_id_type_name;
+							checkpass[j].id_no = message.data.normal_passengers[i].passenger_id_no;
+							checkpass[j].all = message.data.normal_passengers[i];
+							j++;
+						}
+					}
+					checkpass.length = j;
+					document.addEventListener('tap', function() {
+						var orderWebview = plus.webview.getWebviewById('fillOrder.html'); // 进入订单页面
+						mui.fire(orderWebview, 'choosePassengers', {
+							checkpass: checkpass,
+						});
+					});
+					
+					if(bl) {
+						mui.alert('最少选择一条信息');
+					} else {
+						mui.back();
+					}
+				});
+			});
+			
+			// Janine:能成功获取列表信息
+			function messageList(length) {
+				messages = document.getElementById('passengerMessages'); // 乘客信息显示
+				var finallist = '';
+				for(var i = 0; i < length; i++) {
+
+					finallist = finallist + '<div class="mui-input-row mui-checkbox" style="height: 50%;margin-top: 10px;"><label>' +
+						message.data.normal_passengers[i].passenger_name + '\&nbsp;\&nbsp;\&nbsp;\&nbsp;\&nbsp;\&nbsp;' +
+						message.data.normal_passengers[i].passenger_type_name + '</p><p>' +
+						message.data.normal_passengers[i].passenger_id_type_name + '\&nbsp;\&nbsp;\&nbsp;\&nbsp;\&nbsp;\&nbsp;' +
+						message.data.normal_passengers[i].passenger_id_no +
+						'</p></label><input data-id= "' + i + '" name="checkbox" type="checkbox"></div>'
+
+				}
+				messages.innerHTML = finallist;
+			}
+		</script>
+
+	</body>
+
+</html>

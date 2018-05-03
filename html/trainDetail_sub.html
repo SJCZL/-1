@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html>
+
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+		<title></title>
+
+		<link rel="stylesheet" type="text/css" href="../css/mui.min.css" />
+		<link rel="stylesheet" type="text/css" href="../css/iconfont.css" />
+		<link rel="stylesheet" type="text/css" href="../css/own.css" />
+
+		<style type="text/css">
+			.topclass {
+				margin-top: -15px;
+				border-top: 1px solid #8fc8ff" ;;
+ 				height: 50px;
+			}
+			
+			.navclass {
+				height: 30px;
+			}
+			
+			p {
+				color: white;
+			}
+			
+			.money {
+				margin-left: 25%;
+				font-size: 16px;
+				color: #f68a00;
+			}
+		</style>
+	</head>
+
+	<body>
+
+		<div id="detailcontent" class="mui-content topclass">
+			<ul id="topList" class="mui-table-view">
+				<li class="mui-table-view-cell" style="background: #8fc8ff;">
+
+					<div class="mui-table">
+						<div class="mui-table-cell mui-col-xs-2 mui-text-right">
+							<p id="from_station_name" style="font-size: 20px;"></p>
+							<p id="start_time" style=" margin-top: 15px;"></p>
+							<p id="train_date" style=" margin-top: 5px;"></p>
+						</div>
+						<div class="mui-table-cell mui-col-xs-2 mui-text-center">
+							<p id="station_train_code" style="font-size: 14px;color: white;"></p>
+							<img src="../img/train.png" style="height: 40px;width: 80px;">
+							<p id="lishi" style="font-size: 12px;"></p>
+						</div>
+						<div class="mui-table-cell mui-col-xs-2">
+							<p id="to_station_name" style="font-size: 20px;"></p>
+							<p id="arrive_time" style=" margin-top: 15px;"></p>
+							<p id="end_train_date" style=" margin-top: 5px;"></p>
+						</div>
+					</div>
+				</li>
+			</ul>
+			<!--<div class="mui-content-padded" align="center">
+				<button id="add" type="button" class="mui-btn mui-icon mui-btn-blue mui-icon-plusempty mui-btn-block">添加乘客</button>
+			</div>-->
+			<!--
+            	
+            	描述：做个下拉刷新
+            -->
+			<div id="refreshContainer" class="mui-content mui-scroll-wrapper" style="overflow:hidden;">
+				<!--下拉刷新容器-->
+				<div class="mui-scroll">
+			
+					<ul class="mui-table-view" id="trainDetList">
+						<!--<li class="mui-table-view-cell">
+							<div class="mui-table navclass">
+								<div class="mui-table-cell mui-col-xs-2 " style="padding-left: 10px;">
+								<p style="padding-top: 10px; font-size:17px ;color: #333333;">特等座&nbsp;&nbsp;<span style="font-size:14px ;">13张 </span></p>
+							</div>
+							<div class="mui-table-cell mui-col-xs-3 " style="padding-left: 10px;">
+								<span class="money">￥1233.0 </span>
+								<button id="order" type="button" class="mui-btn mui-btn-blue mui-pull-right" style="margin-top: -5px;">预订</button>
+							</div>
+						</div>
+					</li>
+					<li class="mui-table-view-cell">
+						<div class="mui-table ">
+							<div class="mui-table-cell mui-col-xs-2 " style="padding-left: 10px;">
+								<p style="padding-top: 10px; font-size:17px ;color: #333333;">一等座&nbsp;&nbsp;<span style="font-size:14px ;">120张 </span></p>
+							</div>
+							<div class="mui-table-cell mui-col-xs-3 " style="padding-left: 10px;">
+								<span class="money">￥635.0 </span>
+								<button type="button" class="mui-btn mui-btn-blue mui-pull-right" id="add" style="margin-top: -5px;">预订</button>
+							</div>
+						</div>
+					</li>
+					<li class="mui-table-view-cell">
+						<div class="mui-table ">
+							<div class="mui-table-cell mui-col-xs-2 " style="padding-left: 10px;">
+								<p style="padding-top: 10px; font-size:17px ;color: #333333;">二等座&nbsp;&nbsp;<span style="font-size:14px ;">50张 </span></p>
+							</div>
+							<div class="mui-table-cell mui-col-xs-3 " style="padding-left: 10px;">
+								<span class="money">￥327.5 </span>
+								<button type="button" class="mui-btn mui-btn-blue mui-pull-right" id="add" style="margin-top: -5px;">预订</button>
+							</div>
+						</div>
+					</li>-->
+				</ul>
+				<span id='progressbar' class="mui-spinner" style="position: absolute;left: 45%;top:250px;"></span>
+			</div>
+		</div>
+			
+		</div>
+
+		<script src="../js/mui.min.js" charset="UTF-8"></script>
+		<script src="../js/ajax.js" charset="UTF-8"></script>
+		<script type="text/javascript" src="../js/returnticket.js" ></script>
+		<script type="text/javascript" charset="UTF-8">
+			mui.init({
+				swipeBack: true,
+				// 下拉刷新功能
+				pullRefresh: {
+					container: '#refreshContainer', //下拉刷新容器标识，querySelector能定位的css选择器均可，比如：id、.class等
+					// 下拉
+					down: {
+						contentdown: '下拉刷新', //可选，在下拉可刷新状态时，下拉刷新控件上显示的标题内容
+						contentover: '释放立即刷新', //可选，在释放可刷新状态时，下拉刷新控件上显示的标题内容
+						contentrefresh: '正在加载..', //可选，正在刷新状态时，下拉刷新控件上显示的标题内容
+						callback: pulldownRefresh //必选，刷新函数，根据具体业务来编写，比如通过ajax从服务器获取新数据；//下拉回调
+					},
+				},
+
+			});
+
+			// 定义变量
+			var selfWebView;                    // 当前子页面
+			var parentWebview;                  // 父页面
+
+			var addOrder;                       // 预订按钮
+			var progressbar;
+			var tour_flag;                      //dc或wc或fc
+			
+			var start_time_previous;            // 出发时间修改前
+			var start_time_front;               // 出发时间前部分
+			var start_time_behind;              // 出发时间后部分
+			var start_time_after;               // 出发时间修改后
+			
+			var	from_station_name;
+			var	to_station_name;
+			var	arrive_time;
+			var	station_train_code;
+			var	train_date;
+			var	lishi;
+			var	end_train_date;
+			
+			var Detail_train_date_one;
+			var Detail_train_date_tow;
+			var Detail_train_date_three;
+			var Detail_train_date;
+			
+			var trainType;
+			var trainDetailPage = null;
+			var trainDetList;
+			var dataItem;                       // 将有用的数据result
+			
+			// 定义控件名
+			var Dfrom_station_name;
+			var Dstart_time;
+			var Dto_station_name;
+			var Darrive_time;
+			var Dlishi;
+			var Dstation_train_code;
+			var Dstart_train_date;
+			var Dend_train_date;
+			var account;
+			var queryLeftNewDetailDTO;           // 关于获取车票座位类型的数据
+			var seatTicketType = [];             // 用于存放车票座位类型
+			var seatTicketNum = [];              // 用于存放车票剩余票数
+			//var seatTicketPrice = [];          // 用于存放车票票价        
+			//预加载功能
+			mui.plusReady(function() {
+				
+				// 初始化相关变量
+				selfWebView = plus.webview.currentWebview(); // 获取当前页面
+				parentWebview = selfWebView.parent();
+
+				tour_flag = parentWebview.tour_flag;
+				console.log("trainDetail.tour_flag--->" + tour_flag);
+				
+				// 修改:对往程和单程添加判断，此处是重点
+				if(tour_flag=="dc"){
+				    ajax_get_initDc({});     	// Janine:初始化单程订单信息
+				}else if(tour_flag=="wc"){
+				    ajax_initWc({});     		// 初始化往程订单信息
+				}
+				
+				addOrder = document.getElementById('order'); // 获取预订按钮
+				progressbar = document.getElementById('progressbar');
+
+				// 获取控件名，并赋值
+				Dfrom_station_name = document.getElementById('from_station_name');
+				Dstart_time = document.getElementById('start_time');
+				Dto_station_name = document.getElementById('to_station_name');
+				Darrive_time = document.getElementById('arrive_time');
+				Dstation_train_code = document.getElementById('station_train_code');
+				Dtrain_date = document.getElementById('train_date');
+				Dlishi = document.getElementById('lishi');
+				Dend_train_date = document.getElementById('end_train_date');
+				trainDetList = document.getElementById('trainDetList');
+                
+				// Janine:测试点击时，添加列表项数据是否传输成功
+				mui('#trainDetList').on('tap', 'button', function() {
+					// Janine:经测试，该出的数据一定会传输过去
+					console.log("Janine:trainDetail.传入下一界面的数据值--->"
+						+ "global:" + dataItem.globalRepeatSubmitToken
+						+ ",from_station_name:" + from_station_name 
+						+ ",start_time_after:" + start_time_after
+						+ ",to_station_name:" + to_station_name 
+						+ ",arrive_time:" + arrive_time 
+						+ ",station_train_code:" + station_train_code
+						+ ",train_date:"+ train_date 
+						+ ",lishi:" + lishi 
+						+ ",end_train_date:" + end_train_date 
+						+ ",seatTicketType:" + seatTicketType[this.getAttribute('data-id')] 
+						+ ",第几个：" + this.getAttribute('data-id'));
+					
+					if(seatTicketNum[this.getAttribute('data-id')] > 0){
+						console.log("Janine:openTrainDetailPage.执行页面跳转--->");
+						//打开订单页面          
+						mui.openWindow({
+							url: 'fillOrder.html',
+							id: 'fillOrder.html',
+							extras:{
+								globaled : dataItem.globalRepeatSubmitToken,
+								key_check_isChange : dataItem.key_check_isChange,
+								leftTicketStr : dataItem.leftTicketStr,
+								train_location : dataItem.train_location,
+								from_station_name : from_station_name,
+								start_time : start_time_after,
+								to_station_name : to_station_name,
+								arrive_time : arrive_time,
+								station_train_code : station_train_code,
+								train_date : Dtrain_date.innerHTML,
+								lishi : lishi,
+								end_train_date : end_train_date,
+								seatTicketType : seatTicketType[this.getAttribute('data-id')],  
+								//seatTicketPrice : seatTicketPrice[this.getAttribute('data-id')],//注释票价信息
+								seatTicketNum : seatTicketNum[this.getAttribute('data-id')],
+								tour_flag : tour_flag,
+    						},
+						});
+					}
+				});
+			});
+			
+			// 初始化订单成功时调用该方法
+			function getinitDcSuccess(data) {
+				console.log("Janine:getinitDcSuccess.进入--->");
+				progressbar.style.display = 'none';
+				dataItem = data.result;   // 将有用的数据赋值给dataItem
+				
+				// Janine:initDc.do接口请求成功,但是返回的数据有空值,就重新请求
+				if(dataItem.key_check_isChange != null && dataItem.key_check_isChange != ""){
+					getSeatTicketType(dataItem);    // 获取车票座位类型
+					// 获取到的值
+					SetTicketData(dataItem);
+				}else{
+					pulldownRefresh();			// Janine:如果获取不到信息,就刷新
+				}
+			}
+			
+			function initWcSuccess(data) {
+				console.log("Janine:getinitDcSuccess.进入--->");
+				progressbar.style.display = 'none';
+				dataItem = data.result;   // 将有用的数据赋值给dataItem
+				
+				// Janine:initDc.do接口请求成功,但是返回的数据有空值,就重新请求
+				if(dataItem.key_check_isChange != null && dataItem.key_check_isChange != ""){
+					getSeatTicketType(dataItem);    // 获取车票座位类型
+					// 获取到的值
+					SetTicketData(dataItem);
+				}else{
+					pulldownRefresh();			// Janine:如果获取不到信息,就刷新
+				}
+			}
+			
+			/**
+			 * 获取车票座位类型
+			 * 
+			 */
+			function getSeatTicketType(data){
+				queryLeftNewDetailDTO = data.queryLeftNewDetailDTO;
+				if(queryLeftNewDetailDTO != null){
+					
+					if(queryLeftNewDetailDTO.SWZ_num >= 0){
+						seatTicketType[0] = "商务座"; 
+						seatTicketNum[0] = queryLeftNewDetailDTO.SWZ_num;         
+						//seatTicketPrice[0] = queryLeftNewDetailDTO.SWZ_price/10.0;    //20170105      
+					}
+					
+					if(queryLeftNewDetailDTO.TZ_num >= 0){
+						seatTicketType[1] = "特等座"; 
+						seatTicketNum[1] = queryLeftNewDetailDTO.TZ_num;         
+						//seatTicketPrice[1] = queryLeftNewDetailDTO.TZ_price/10.0 ;  //20170105
+					}
+					
+					if(queryLeftNewDetailDTO.ZY_num >= 0){
+						seatTicketType[2] = "一等座"; 
+						seatTicketNum[2] = queryLeftNewDetailDTO.ZY_num;         
+						//seatTicketPrice[2] = queryLeftNewDetailDTO.ZY_price/10.0 ;  //20170105
+					}
+					
+					if(queryLeftNewDetailDTO.ZE_num >= 0){
+						seatTicketType[3] = "二等座"; 
+						seatTicketNum[3] = queryLeftNewDetailDTO.ZE_num;         
+						//seatTicketPrice[3] = queryLeftNewDetailDTO.ZE_price/10.0 ;  //20170105
+					}
+					
+					if(queryLeftNewDetailDTO.GR_num >= 0){
+						seatTicketType[4] = "高级软卧"; 
+						seatTicketNum[4] = queryLeftNewDetailDTO.GR_num;         
+						//seatTicketPrice[4] = queryLeftNewDetailDTO.GR_price/10.0 ; //20170105 
+					}
+					
+					if(queryLeftNewDetailDTO.RW_num >= 0){
+						seatTicketType[5] = "软卧"; 
+						seatTicketNum[5] = queryLeftNewDetailDTO.RW_num;         
+						//seatTicketPrice[5] = queryLeftNewDetailDTO.RW_price/10.0 ; //20170105 
+					}
+					
+					if(queryLeftNewDetailDTO.YW_num >= 0){
+						seatTicketType[6] = "硬卧"; 
+						seatTicketNum[6] = queryLeftNewDetailDTO.YW_num;         
+						//seatTicketPrice[6] = queryLeftNewDetailDTO.YW_price/10.0 ;  //20170105
+					}
+					
+					if(queryLeftNewDetailDTO.RZ_num >= 0){
+						seatTicketType[7] = "软座"; 
+						seatTicketNum[7] = queryLeftNewDetailDTO.RZ_price;         
+						//seatTicketPrice[7] = queryLeftNewDetailDTO.RZ_price/10.0 ;  //20170105
+					}
+					
+					if(queryLeftNewDetailDTO.YZ_num >= 0){
+						seatTicketType[8] = "硬座";
+						seatTicketNum[8] = queryLeftNewDetailDTO.YZ_num;         
+						//seatTicketPrice[8] = queryLeftNewDetailDTO.YZ_price/10.0 ;  //20170105
+					}
+					
+					if(queryLeftNewDetailDTO.WZ_num >= 0){
+						seatTicketType[9] = "无座"; 
+						seatTicketNum[9] = queryLeftNewDetailDTO.WZ_num;         
+						//seatTicketPrice[9] = queryLeftNewDetailDTO.WZ_price/10.0 ; //20170105 
+					}
+				}
+			}
+			
+			function SetTicketData(dataItem){
+				from_station_name = queryLeftNewDetailDTO.from_station_name;
+				Dfrom_station_name.innerHTML = from_station_name;
+				
+				station_train_code = queryLeftNewDetailDTO.station_train_code;
+				Dstation_train_code.innerHTML = station_train_code;
+				
+				to_station_name = queryLeftNewDetailDTO.to_station_name;
+				Dto_station_name.innerHTML = to_station_name;
+				
+				// 对出发直接做处理
+				start_time_previous = queryLeftNewDetailDTO.start_time;
+				start_time_front = start_time_previous.substring(0,2);
+				start_time_behind = start_time_previous.substring(start_time_previous.length-2,start_time_previous.length);
+				start_time_after = start_time_front + ":" + start_time_behind;
+				
+				Dstart_time.innerHTML = start_time_after;                   	 // 出发时间
+				
+				arrive_time = dataItem.queryLeftTicketRequestDTO.arrive_time;    // 到达时间
+				Darrive_time.innerHTML = arrive_time;
+				
+				train_date = dataItem.queryLeftTicketRequestDTO.train_date;
+					
+				Detail_train_date_one = train_date.substring(0,4);
+				Detail_train_date_tow = train_date.substring(4,6);
+				Detail_train_date_three = train_date.substring(6,train_date.length);
+				Detail_train_date = Detail_train_date_one + '-' + Detail_train_date_tow + '-' + Detail_train_date_three;
+				Dtrain_date.innerHTML = Detail_train_date;
+				localStorage.setItem("Detail_train_date",Detail_train_date);
+					
+				lishi = queryLeftNewDetailDTO.lishi;
+				Dlishi.innerHTML = lishi;
+				
+				end_train_date = dataItem.queryLeftTicketRequestDTO.train_date.substring(0,4)+"-"+dataItem.queryLeftTicketRequestDTO.train_date.substring(4,6)+"-"+dataItem.queryLeftTicketRequestDTO.train_date.substring(6,dataItem.queryLeftTicketRequestDTO.train_date.length);    
+				Dend_train_date.innerHTML = end_train_date;                       // 暂时没有
+				
+				var finallist = '';
+				for(var i = 0; i < 10; i++){
+					
+					if(seatTicketType[i] != undefined){
+						console.log("Janine:seatTicketType[]--->" + seatTicketType[i]);
+						finallist = finallist + '<li class="mui-table-view-cell"><div class="mui-table navclass"><div class="mui-table-cell mui-col-xs-2 " style="padding-left: 10px;"><p style="padding-top: 10px; font-size:17px ;color: #333333;">'
+									+ seatTicketType[i] + '&nbsp;&nbsp;<span style="font-size:14px ;">'
+									+ seatTicketNum[i] + '张</span></p></div><div class="mui-table-cell mui-col-xs-3 " style="padding-left: 10px;"><span class="money">'
+									+ '</span>';
+						if(seatTicketNum[i] > 0){
+							// Janine:大于0说明有票，所以显示；蓝色按钮
+							finallist = finallist + '<button data-id="' + i + '" type="button" class="mui-btn mui-btn-blue mui-pull-right" style="margin-top: -5px;">预订</button></div></div></li>';
+						}else{
+							// Janine:除了大于0就是小于等于0
+							finallist = finallist + '<button data-id="' + i + '" type="button" class="mui-btn mui-pull-right" style="margin-top: -5px;">预订</button></div></div></li>';
+						}
+									
+					}
+					trainDetList.innerHTML = finallist;
+				}
+			}
+			// 实现下拉列表刷新
+			function pulldownRefresh() {
+				setTimeout(function() {
+					console.log("进入下拉刷新--->");
+					ajax_get_initDc({});     // 初始化订单信息
+					mui('#pullrefresh').pullRefresh().endPulldownToRefresh(); //注意，加载完新数据后，必须执行如下代码，注意：若为ajax请求，则需将如下代码放置在处理完ajax响应数据之后
+				}, 1000);
+			}
+		</script>
+
+	</body>
+
+</html>

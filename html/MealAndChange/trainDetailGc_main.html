@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+		<title></title>
+		<script src="../../js/mui.min.js"></script>
+		<link href="../../css/mui.min.css" rel="stylesheet" />
+		<script type="text/javascript" charset="UTF-8">
+			mui.init({
+				gestureConfig: {
+					doubletap: true
+				},
+				subpages: [{
+					url: 'trainDetailGc_sub.html', //下拉刷新内容页面地址
+					id: 'trainDetailGc_sub.html', //内容页面标志
+					styles: {
+						top: '45px', //内容页面顶部位置,需根据实际页面布局计算，若使用标准mui导航，顶部默认为48px；
+						bottom: '0px',
+					}
+				}],
+				
+				/**
+				 * 2016-09-19
+				 * Janine:mui.back()——页面重新加载
+				 */
+				beforeback: function(){
+					// 获得列表界面的webview
+					var list  = plus.webview.getWebviewById('trainResultShow_main');
+					mui.fire(list ,'refresh');
+					// 返回true，继续页面关闭逻辑
+					return true;
+				},
+				
+			});
+		</script>
+	</head>
+
+	<body>
+		<!--头部信息-->
+		<header class="mui-bar mui-bar-nav">
+			<a id="back" class="mui-action-back mui-icon mui-icon-left-nav mui-pull-left"></a>
+			<h1 id="title" class="mui-title">改签详情</h1>
+		</header>
+
+	</body>
+
+</html>

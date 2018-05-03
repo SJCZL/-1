@@ -1,0 +1,151 @@
+<!doctype html>
+<html>
+
+	<head>
+		<meta charset="UTF-8">
+		<title></title>
+		<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+		<link href="../../css/mui.min.css" rel="stylesheet" />
+		<style>
+			.mui-btn {
+				width: 100%;
+				height:50px;
+				font-size: 25px;
+			}
+		</style>
+	</head>
+
+	<body>
+		<header class="mui-bar mui-bar-nav">
+		    <a class="mui-action-back mui-icon mui-icon-left-nav mui-pull-left"></a>
+		    <h1 class="mui-title">历史订单</h1>
+		</header>
+		<div class="mui-content">
+		    <ul class="mui-table-view">
+		        <li class="mui-table-view-cell">
+		           <div class="mui-table">
+						<div class="mui-table-cell mui-col-xs-2">
+							<p style="font-size: 16px;">查询日期-开始</p>
+						</div>
+						<div class="mui-table-cell mui-col-xs-2">
+							<input id="start_date" type='date'/>
+						</div>
+					</div>    
+		        </li>
+		        <li class="mui-table-view-cell">
+		            <div class="mui-table">
+						<div class="mui-table-cell mui-col-xs-2">
+							<p style="font-size: 16px;">查询日期-结束</p>
+						</div>
+						<div class="mui-table-cell mui-col-xs-2">
+							<input id="end_date" type='date' value="javascript:nowDate();"/>
+						</div>
+					</div>        
+		        </li>
+		        <li class="mui-table-view-cell">
+		            <div class="mui-table">
+						<div class="mui-table-cell mui-col-xs-2 ">
+							<p style="font-size: 16px;">相关信息</p>
+						</div>
+						<div class="mui-table-cell mui-col-xs-2  ">					
+					        <input id="sequeue_train_name" placeholder="订单号/车次/乘客姓名"  style="border-style: none"/>
+						</div>
+					</div>      
+		        </li>
+		    </ul>
+		    <div class="mui-content-padded" align="center">
+		        <button id="pay" type="button" class="mui-btn mui-btn-blue">查询</button>
+	        </div>
+		</div>
+		<script src="../../js/mui.min.js"></script>
+		<script type="text/javascript" src="../../js/wl_ajax.js" ></script>  <!--判断前一天后一天的js文件-->
+		<script src="../../js/jquery-1.8.3.min.js"></script>
+		<script type="text/javascript">
+			mui.init();
+			
+			var payBtn;                                      // 查询按钮
+			var today;                                       // 今天的时间
+		
+			var ago;             // Janine:前15天
+			var yesterday;       // Janine:昨天
+
+			var start_time;                                  // 起始时间
+			var end_time;                                    // 结束时间
+
+			mui.plusReady(function(){
+				
+				payBtn = document.getElementById('pay');                                  // 获取查询按钮
+				
+				// 赋值
+				$("#end_date")[0].value = forward();
+				$("#start_date")[0].value = forwardAGO();
+				// 查询历史订单的按钮
+				payBtn.addEventListener('tap',function(){
+					console.log("查询历史订单的点击事件--->");
+					
+					// 获取起始时间、结束时间和相关信息
+					start_time = $("#start_date").val();
+					end_time = $("#end_date").val();
+					sequeue_train_name = $("#sequeue_train_name").val();
+					
+					console.log("查询未出行订单传值--->" +start_time+",end_time:" + end_time 
+							+ ",sequeue_train_name:" + sequeue_train_name);
+					
+					// 点击进入历史订单页面
+					mui.openWindow({
+						url : 'HistoryOrdersDisplay.html',
+						id : 'HistoryOrdersDisplay',
+						extras : {
+							start_time : start_time,
+							end_time : end_time,
+							sequeue_train_name : sequeue_train_name,
+						}
+					});
+				});
+			});
+
+			// 获取当前时间
+			function nowDate(){
+				
+				now = new Date();     // 当前日期
+				if((now.getMonth() + 1) < 10){
+					
+					if(now.getDate()<10){
+						today = now.getFullYear() + '-' +'0' + (now.getMonth() + 1) + '-' +'0' + now.getDate();// 当前日期
+					}else{
+						today = now.getFullYear() + '-' +'0' + (now.getMonth() + 1) + '-' + now.getDate();// 当前日期
+					}
+					
+				}else{
+					
+					if(now.getDate()<10){
+						today = now.getFullYear() + '-' + (now.getMonth() + 1) + '-' +'0' + now.getDate();// 当前日期
+					}else{
+						today = now.getFullYear() + '-' + (now.getMonth() + 1) + '-' + now.getDate();// 当前日期
+					}
+					
+				}
+				
+				console.log("today is day--->" + today);
+				return today;
+				
+			}
+			
+			function forward(){
+                var timt=getBeforeDay(nowDate(),1,false).split(" ");
+                console.log("Janine:前一天--->" + timt[0]);
+                yesterday = timt[0];
+                return yesterday;
+		    }
+			
+			function forwardAGO(){
+                var timt=getBeforeDay(nowDate(),16,false).split(" ");
+                console.log("Janine:前15天--->" + timt[0]);
+                ago = timt[0];
+                return ago;
+		    }
+			
+		</script>
+	</body>
+          
+</html>

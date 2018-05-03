@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+    <title>火车票订购</title>
+    <link href="css/mui.min.css" rel="stylesheet"/>
+    <style>
+		html,
+		body {
+			background-color: #efeff4;
+		}
+	</style>
+</head>
+<body>
+	<!--头部内容：mheader-->
+	<header class="mui-bar mui-bar-nav">
+		<h1 id="title" class="mui-title">火车票订购</h1>
+	</header>
+    <!--nav就是导航标签的意思，navigator的缩写-->
+	<nav class="mui-bar mui-bar-tab">
+		<a id="defaultTab" class="mui-tab-item mui-active" href="main_tab/tickets.html">
+			<!--<span class="mui-icon mui-icon-home"></span>-->
+			<span class="mui-tab-label">购票</span>
+		</a>
+		<a class="mui-tab-item" href="main_tab/orders.html">
+			<!--<span class="mui-icon mui-icon-gear"></span>-->
+			<span class="mui-tab-label">出行向导</span>
+		</a>
+		<a class="mui-tab-item" href="main_tab/person.html">
+			<!--<span class="mui-icon mui-icon-person"></span>-->
+			<span class="mui-tab-label">个人中心</span>
+		</a>
+	</nav>
+	<script src="js/mui.min.js"></script>
+	<script src="js/ajax.js" charset="UTF-8"></script>
+    <script type="text/javascript" charset="UTF-8">
+		//mui插件初始化
+		mui.init({
+			swipeBack: false
+		});
+		//定义变量
+		var mainWebView;
+		var subpages = ['main_tab/tickets.html','main_tab/orders.html', 'main_tab/person.html'];//tab标签的页面数组
+		var subpagesView = {};//每个tabitem所对应显示的页面对象
+		var curTabItem; //当前被选中tabitem
+		var navtitle = document.getElementById('title');//头部标题栏的标题
+		var show_date;
+		var station_name;   // 显示车站名
+		
+		//父子模版页面
+		var headerWebView;
+		var contentWebView;
+		
+		//页面初始化
+		mui.plusReady(function() {
+
+			mainWebView = plus.webview.currentWebview(); //当前页面，这句话就是表示当前
+			
+			//添加newId自定义事件监听
+			window.addEventListener('openMainTicketsPage',function(event){
+   				//获得事件参数
+   				console.log("接收数据.openMainTicketsPage.station_name--->" + event.detail.station_name);
+   				station_name = event.detail.station_name;
+   				
+			});
+			
+			// Janine:添加AddNew自定义事件监听,这个是要刷新的界面,登录后返回刷新
+			window.addEventListener('AddNew',function(){
+				console.log("Janine:****主页中的person刷新--->");
+				plus.webview.getWebviewById('main_tab/person.html').reload();
+			});
+			
+			// Janine:添加AddNew自定义事件监听,这个是要刷新的界面,登录后返回刷新
+			window.addEventListener('personReload',function(){
+				console.log("Janine:****退出后重新加载person--->");
+				plus.webview.getWebviewById('main_tab/person.html').reload();
+			});
+			
+			initWebView();
+			addTabitemEventListener();
+			
+			//初始化父子模版函数
+		    initParentChildTemplate();
+		    //接收自定义的事件页面切换
+			changeWebViewEvent();
+			
+			// Janine:首先获取appkey——在调用所有接口之前，首先调用该接口获取到appkey，作为其他接口的凭证，在调用其他接口时，部分要传这个appkey
+			if (!localStorage.getItem('app_key')) {
+				console.log("app_key为空！");
+				ajax_get_appkey({}); //调用app_key接口的方法
+			} else {
+				closeStartScreent(); //调用方法在下面
+			}
+			
+			/********************************************
+			 * Janine:获取到appkey之后，需要判断用户是否登录            *
+			 * 因为在很多情况下都需要在用户登录的状态下进行操作
+			 */
+			
+			//退出的方法
+			var backButtonPress = 0;
+			mui.back = function(event) {
+				backButtonPress++;
+				if (backButtonPress > 1) {
+					plus.runtime.quit();
+				} else {
+					plus.nativeUI.toast('再按一次退出应用');
+				}
+				setTimeout(function() {
+					backButtonPress = 0;
+				}, 1000);
+			return false;
+			};
+		});
+		
+		//关闭启动页面使用户感觉白屏时间短
+		function closeStartScreent(){
+			//创建父子模版完成后关闭启动页面
+			plus.navigator.closeSplashscreen();
+		}
+		
+		//预加载初始化每个底部图标所对应的页面
+		function initWebView() {
+			for (var i = 0; i < subpages.length; i++) {
+				//实现预加载页面
+				subpagesView[i] = mui.preload({
+					url: subpages[i],
+					id: subpages[i],//默认使用当前页面的url作为id
+					//窗口参数,就是窗口的一些样式
+					styles: {
+						top: '44px',
+						bottom: '51px',
+						left: '0px',
+						bounce: 'vertical',
+						bounceBackground: '#DCDCDC'
+					},
+					waiting: {
+		   				autoShow: false
+		   			},
+					extras: {
+						station_name : "asdfds",
+					}// 额外扩展参数
+				});
+				subpagesView[i].hide();
+				mainWebView.append(subpagesView[i]);
+				
+			}
+			subpagesView[0].show();// 显示第一个页面
+		}
+		
+		// 为每个tabitem添加监听
+		function addTabitemEventListener() {
+			mui('.mui-bar-tab').on('tap', '.mui-tab-item', function() {
+				var tabitem = this;// 当前tabitem
+				if (tabitem == curTabItem) {
+					return;
+				}
+				curTabItem = tabitem;
+				if(tabitem.children[tabitem.children.length - 1].innerText=="购票"){
+					navtitle.innerText = "火车票购票";
+				}else {
+					navtitle.innerText = tabitem.children[tabitem.children.length - 1].innerText;//改变头部的标题
+				}
+				// 设置将显示当前webview
+				showCurWebView(tabitem.getAttribute('href'));// 调用下面切换tab的显示函数
+			});
+		}
+		
+		// 设置webview的切换显示的函数
+		function showCurWebView(href) {
+			console.log("showCurWebView.进入--->");
+			var index = 0;
+			for (var i = 0; i < subpages.length; i++) {
+				if (href == subpages[i]) {
+					index = i;
+				} else {
+					subpagesView[i].hide();
+				}
+			}
+			//显示点击的页面
+			subpagesView[index].show();
+		}
+		
+		//初始化父子模版函数
+		function initParentChildTemplate() {
+			//预加载模板父页面
+			headerWebView = mui.preload({
+				url: 'template-main.html',
+				id: 'template-main.html',
+				styles: {
+					top:'0px',
+					bottom:'0px'
+				},
+				extras: {
+					mtype: 'main'
+				}
+			});
+			//预加载共用子页面
+			contentWebView = mui.preload({
+				url: '',
+				id: 'template-sub.html',
+				styles: {
+					top: '44px',
+					bottom: '0px',
+					bounce: 'vertical',
+					bounceBackground:'#DCDCDC'
+				},
+				extras: {
+					mtype: 'sub'
+				}
+			});
+			contentWebView.hide();
+			headerWebView.hide();
+			contentWebView.addEventListener('loaded', function() {
+				contentWebView.show();
+			}, false);
+			headerWebView.addEventListener('hide', function() {
+				//设置statusbar
+				plus.navigator.setStatusBarBackground('#41cea9');
+				contentWebView.hide();
+			}, false);
+			headerWebView.addEventListener('show',function(){
+				//设置statusbar
+				plus.navigator.setStatusBarBackground('#f7f7f7');
+			});
+			headerWebView.append(contentWebView);
+		}
+		
+		//添加监听事件
+		function changeWebViewEvent() {
+			window.addEventListener('newWebView', function(options) {
+			   //通过options.detail可获得传递过来的参数内容
+			    var data_time=options.detail.data_time;
+			    var title_name=options.detail.title_name;
+				var station_name=options.detail.station_name;
+				
+				var id = options.detail.id;
+				var href = options.detail.href;
+				var aniShow = options.detail.aniShow;
+				var title = options.detail.title;
+				console.log("进入changeWebViewEvent-----"+id);
+				console.log(title_name);
+				console.log(station_name);
+				//headerWebView.hide();如果在这里添加这个代码，会导致监听事件在下面contentwebview show之后又隐藏掉它
+				contentWebView.hide();
+					mui.fire(headerWebView,'templateFire',{
+						id:id,
+						title: title,
+			   			aniShow: aniShow,
+			   			target: href,
+			   			data_time:data_time,
+			   			title_name : title_name,
+			   			station_name : station_name
+					});
+						
+					//再次加载页面显示的也是之前加载的页面信息，所以这里，在这个页面返回的时候将里面的数据清空
+					if(mui.os.ios||(mui.os.android&&parseFloat(mui.os.version)<4.4)){
+						var str = contentWebView.getURL();
+						var index = str.indexOf('www/');
+						str = str.substring(index+4);
+						if ((!~id.indexOf('Startstation-datile') && !~id.indexOf('goods-detail') )&&(contentWebView.getURL() == href || str == href)) {
+	//						console.log("loaded");
+							contentWebView.show();
+						}else {
+							contentWebView.loadURL(href);
+						}
+						headerWebView.show(aniShow,150);
+				}
+			});
+		};
+		
+    </script>
+</body>
+</html>

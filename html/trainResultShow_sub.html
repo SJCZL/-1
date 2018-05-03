@@ -1,0 +1,838 @@
+﻿<!DOCTYPE html>
+<html>
+
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1,maximum-scale=1,user-scalable=no">
+		<meta name="apple-mobile-web-app-capable" content="yes">
+		<meta name="apple-mobile-web-app-status-bar-style" content="black">
+		<title></title>
+		<script src="../js/mui.min.js"></script>
+		<script type="text/javascript" src="../js/mui.js" ></script>
+		<link href="../css/mui.min.css" rel="stylesheet" />
+		<link rel="stylesheet" href="../css/app.css" />
+		<link rel="stylesheet" type="text/css" href="../css/iconfont.css" />
+		<style>
+	    /*跨webview需要手动指定位置*/
+	        /*zhs:2017-01-06:修改#listPopover和#selPopover*/
+		    #listPopover{
+		    	/*position: relative ;*/
+				width: 200px;
+				margin-left: 30%;
+				/*margin-bottom: 12%;*/
+			}
+			
+			#selPopover{
+				/*position: relative ;*/
+				width: 200px;
+				margin-left: 45%;
+				/*margin-bottom: 12%;*/
+			}
+			.mui-table-view-divider{
+				height: 40px;
+			}
+			/*.nav{
+				position: absolute ;
+			}*/
+			
+		</style>
+	</head>
+
+	<body>
+		
+		<!--zhs:2017-01-06:修改 nav-->
+		<nav class="nav mui-bar mui-bar-tab">
+		    <a class="mui-tab-item " >
+		        <span id="timeicon" class="mui-icon iconfont icon-shijian1" ></span>
+		        <span id="timeSort" class="mui-tab-label"  >时间顺序</span>
+		    </a>
+		    <a id="open_listPopover" class="mui-tab-item "   >
+		        <span class="mui-icon iconfont icon-huoche"></span>
+		        <span class="mui-tab-label" >车型选择</span>
+		    </a>
+		    <a id="open_selPopover" class="mui-tab-item " >
+		        <span class="mui-icon iconfont icon-shaixuan"></span>
+		        <span class="mui-tab-label" >筛选</span>
+		    </a>
+		</nav>
+		<!--
+    	
+    	描述： mui通过双webview解决这个DIV的拖动流畅度问题；拖动时，拖动的不是div，
+    		而是一个完整的webview（子webview），回弹动画使用原生动画；
+    	-->
+		<div id="refreshContainer" class="mui-content mui-scroll-wrapper" style="overflow:hidden;">
+			<!--下拉刷新容器-->
+			<div  class="mui-scroll" >
+				<!--
+        			
+        			描述：表格控件mui-table-view
+        			按理说，这里的前一天，后一天的显示应该是固定不变的，但是MUI的不是这样设计的
+        		-->
+				<ul id="trainResultList" class="mui-table-view">
+					<li class="mui-table-view-cell" style="background: #8fc8ff;text-align: center;">
+						<div class="mui-table">
+							<div class="mui-table-cell mui-col-xs-2">
+								<br/>
+								<p style="color: white;  margin-left: -40% " onclick=forward()>
+									<span class="mui-icon mui-icon-back" ></span>
+									<font style="font-size: 18px;">前一天</font>
+								</p>
+							</div>
+							<div  class="mui-table-cell mui-col-xs-3 ">
+								<p id="headDatas" style="font-size: 16px;color: white;text-align: center; "></p>
+								<button style="background: white; height: 40px;text-align: left; ">
+				                    <span>
+				                        <font id="date_time" style="font-size: 120%;margin:-4% 0% 10% 4%;"></font>
+				                        <img src="../img/calendar.png" style="margin:2% 4% 0 4%; "/>
+				                    </span>
+								</button>
+							</div>
+							<div class="mui-table-cell mui-col-xs-2"><br/>
+								<p style="color: white;margin-right: -20%;" onclick=back()>
+									<font style="font-size: 18px;">后一天</font>
+									<span class="mui-icon mui-icon-forward" ></span>
+								</p>
+							</div>
+						</div>
+					</li>
+				</ul>
+				<ul id="trainList" class="mui-table-view mui-table-view-chevron">
+					<!--
+						
+						描述：里面的每一块子元素
+					-->
+					<!--<li class="mui-table-view-cell">
+						<div class="mui-table">
+							<a href="#">
+								<div class="mui-table-cell mui-col-xs-2 ">
+									<p>15:15</p>
+									<p>21:07</p>
+									<p>商务座:0</p>
+								</div>
+								<div class="mui-table-cell mui-col-xs-2 ">
+									<p>G145</p>
+									<p>05:52</p>
+									<p>一等座:0</p>
+								</div>
+								<div class="mui-table-cell mui-col-xs-2">
+									<p>北京南</p>
+									<p>上海虹桥</p>
+									<p>二等座:0</p>
+								</div>
+								<div class="mui-table-cell mui-col-xs-2">
+									<p>二等座</p>
+									<p style="">￥553.0起</p>
+									<p>154张</p>
+								</div>
+								<div class="mui-table-cell mui-col-xs-2">
+									<br />
+									<button id="order" type="button" class="mui-btn mui-btn-blue mui-pull-right" style="margin-top: -5px;">预订</button>
+								</div>
+								
+							</a>
+						</div>
+					</li>-->
+				</ul>
+				<span id='progressbar' class="mui-spinner" style="position: absolute;left: 45%;top:250px;"></span>
+			</div>
+			
+		</div>	
+		
+			
+		<!--zhs:2017-01-09修改：车型选择-->
+		<div id="listPopover" class="mui-popover mui-popover-action  mui-popover-bottom">
+			    <ul class="mui-table-view">
+					<div class="mui-table-view-divider" >
+						<p class="mui-pull-left " id="close_listPopover">关闭</p>车型选择
+						<p class="mui-pull-right" id="sure_listPopover" style="text-align: left;">确定</p>
+					</div>
+					<form class="list mui-input-group">
+						<div class="mui-input-row mui-checkbox">
+							<label>GC高铁/城际</label>
+							<input name="checkbox1" value="Item 3" type="checkbox" >
+						</div>
+						<div class="mui-input-row mui-checkbox">
+							<label>D动车</label>
+							<input name="checkbox1" value="Item 4" type="checkbox" >
+						</div>
+						<div class="mui-input-row mui-checkbox ">
+							<label>Z字头</label>
+							<input name="checkbox1" type="checkbox" >
+						</div>
+						<div class="mui-input-row mui-checkbox">
+							<label>T字头</label>
+							<input name="checkbox1" value="Item 4" type="checkbox" >
+						</div>
+						<div class="mui-input-row mui-checkbox ">
+							<label>K字头</label>
+							<input name="checkbox1" type="checkbox" >
+						</div>
+						<div class="mui-input-row mui-checkbox ">
+							<label>其他</label>
+							<input name="checkbox1" type="checkbox" >
+						</div>
+					</form>
+				</ul>
+		</div>
+		
+		
+		<!--zhs:2017-01-09修改：筛选 -->
+		<div id="selPopover" class="mui-popover mui-popover-action  mui-popover-bottom">
+			    <ul class="mui-table-view">
+					<div class="mui-table-view-divider" >
+						<p class="mui-pull-left " id="close_selPopover">关闭</p>
+						<p class="mui-pull-right" id="sure_selPopover" style="text-align: left;">确定</p>
+					</div>
+					<form class="sel mui-input-group">
+						<div class="mui-input-row mui-checkbox">
+							<label>10:00之前</label>
+							<input name="checkbox1" value="Item 3" type="checkbox" >
+						</div>
+						<div class="mui-input-row mui-checkbox">
+							<label>10:01-18:00</label>
+							<input name="checkbox1" value="Item 4" type="checkbox" >
+						</div>
+						<div class="mui-input-row mui-checkbox ">
+							<label>18:01之后</label>
+							<input name="checkbox1" type="checkbox" >
+						</div>
+					</form>
+				</ul>
+		</div>
+		
+		<script src="../js/mui.min.js" charset="UTF-8"></script>
+		<script src="../js/ajax.js" charset="UTF-8"></script>
+		<script type="text/javascript" src="../js/own.js" ></script>
+		
+		<script type="text/javascript" src="../js/wl_ajax.js" ></script>  <!--判断前一天后一天的js文件-->
+		<script type="text/javascript" src="../js/returnticket.js" ></script> <!--购买往返车票ajax申请数据的js文件-->
+		<!--ajax请求-->
+ 		<script type="text/javascript">
+			//mui插件初始化
+			mui.init({
+				swipeBack:true,
+				// 下拉刷新功能
+				pullRefresh: {
+					container: '#refreshContainer', //下拉刷新容器标识，querySelector能定位的css选择器均可，比如：id、.class等
+					// 下拉
+					down: {
+						contentdown: '下拉刷新', //可选，在下拉可刷新状态时，下拉刷新控件上显示的标题内容
+						contentover: '释放立即刷新', //可选，在释放可刷新状态时，下拉刷新控件上显示的标题内容
+						contentrefresh: '正在加载..', //可选，正在刷新状态时，下拉刷新控件上显示的标题内容
+						callback: pulldownRefresh //必选，刷新函数，根据具体业务来编写，比如通过ajax从服务器获取新数据；//下拉回调
+					},
+				}
+			});
+			// 初始化变量
+			var self;          			// 获取当前页面
+			var selfParent;    			// 获取当前页面的父页面
+			var headData;      			// 头部信息     头部信息中还缺少“星期”或者“周”
+			var Detail_train_date;
+			
+			var date_time
+			
+			var train_date;    			// 出发日期
+			var from_station;           // 出发站名称
+			var to_station;    			// 目的站名称
+			var purpose_codes;          // 普通：ADULT，学生：0X00
+			var tour_flag;              // Janine:接收传过来的dc、gc、wc、fc
+			
+			var progressbar;
+			var trainResultWebView;     // 车次列表当前页面
+			var trainResultList;        // 获取ul标签（元素），关于头部信息的动态修改
+			var trainList;              // 显示查询数据
+			var dataItems;              // 将json的datas赋给dataItems
+			var dataItemArr;            // 真正关于车票的相关信息
+			var dataAll = [];           // 获取dataItemArr中的queryLeftNewDTO的数组
+			var account;
+
+			var back_train_date;          // 返程日期
+			var query_from_station_name;  // 出发站名,中文utf-8编码
+			var query_to_station_name;    // 到达站名,中文utf-8编码
+			var secretStr;                // 上一步查询时返回的加密字符串，注意该字符串较长，传值时中间不能有空格
+			var day_difference;
+			var flag_list=[];                  //存储选择的车型
+			var flag_sel=[];                  //存储筛选的时间
+
+			// 预加载功能
+			mui.plusReady(function() {
+				
+				trainResultWebView = plus.webview.currentWebview();               // 获取当前页面
+				trainResultList = document.getElementById('trainResultList');     // 获取ul标签（元素）
+				trainList = document.getElementById('trainList');                 // 获取列表UL
+				headData = document.getElementById('headDatas');                  // 获取头部信息
+				progressbar = document.getElementById('progressbar');             // Janine:进度条
+                date_time = document.getElementById('date_time');                 // 获取时间信息
+                
+				//1. 先获取前一界面传过来的数据
+				self = plus.webview.currentWebview();                             // 获取当前页面
+				selfParent = self.parent();           							  // 获取当前页面的父页面
+				
+				//2. 接收上一界面传来的参数
+				purpose_codes = selfParent.purpose_codes;                         // 乘车人类型:学生票或成人票
+				train_date = selfParent.train_date;                               // 出发时间
+				from_station = selfParent.from_station;                           // 出发站车站名称
+				to_station = selfParent.to_station;                               // 目的站车站名称
+				tour_flag = selfParent.tour_flag;
+				
+				if(selfParent.back_train_date != null){
+					back_train_date = selfParent.back_train_date;
+				}
+				
+				Detail_train_date = localStorage.getItem('Detail_train_date');
+				if(Detail_train_date != null && Detail_train_date !=''){
+					train_date = Detail_train_date;
+					console.log("Janine:返回页面赋值不为空！------>" + Detail_train_date);
+				}
+				
+				if(tour_flag == "fc"){
+					date_time.innerHTML = back_train_date;
+				}else{
+					date_time.innerHTML = train_date;
+				}
+				
+				date_time.addEventListener('tap',function(){
+			        var address="trainResultShow_sub.html";
+					mui.openWindow({
+						url: 'calendar.html',
+						id: 'calendar.html',
+						extras:{
+							data : address,
+					    }
+					});
+				});
+				
+				window.addEventListener('getclock',function(e){
+					console.log(e.detail.time);
+					if(typeof(e.detail.time)!="undefined"){
+		                date_time.innerHTML=e.detail.time;
+		                train_date = e.detail.time;
+		                localStorage.setItem("Detail_train_date",train_date);
+		            }
+					get_data();
+				});
+				
+				// 在get_data()方法中调用ajax_get_leftTicket接口，向服务器发出请求，这里的json数据是从前一届界面传过来的
+				get_data();
+				
+				/**
+				 * 自定义事件：触发自定义事件-通过mui.fire()方法可触发目标窗口的自定义事件
+				 */
+				mui('#trainList').on('tap', 'button', function() {
+					
+					//Janine:直接对点击的item做判断,判断secretStr是否为空,如果是,说明没有票了
+					if(dataItems.data[this.getAttribute('data-id')].secretStr !="" 
+							&& dataItems.data[this.getAttribute('data-id')].secretStr !=null){
+						// Janine:这样做会更直接,不会影响到下面的接口
+						ajax_checkUser({});    // 检查用户是否登录
+						query_from_station_name = dataAll[this.getAttribute('data-id')].from_station_name;     // 出发站名字
+						query_to_station_name = dataAll[this.getAttribute('data-id')].to_station_name;         // 目的站名字
+						secretStr = dataItems.data[this.getAttribute('data-id')].secretStr;              	   // 加密字符串
+						console.log("Janine:secretStr--->" + secretStr);
+					}
+							
+				});
+				
+				//7.时间顺序排序：点击“时间顺序”时      应该是车票类型的问题
+				var timeicon=document.getElementById('timeicon')
+                timeicon.addEventListener('tap',function(){
+                	console.log("进入时间点击事件--->");
+	            	if(timeSort.innerHTML=="时间倒序"){
+	            		console.log(timeSort.innerHTML);
+	            		trainList.innerHTML = '';
+	            		trainResultShowList(dataItemArr.length,1); //顺序显示
+	            		timeSort.innerHTML="时间顺序";
+	            	}else{
+	            		console.log(timeSort.innerHTML);
+	                    trainList.innerHTML = '';
+	            		timeSort.innerHTML="时间倒序";
+	            		trainResultShowList(dataItemArr.length,0); //顺序显示
+	            	}
+	            });
+				
+				
+				// zhs:2017-01-09 修改：车型选择
+                var open_listPopover=document.getElementById("open_listPopover")
+                open_listPopover.addEventListener('tap',function(){
+					mui('#listPopover').popover('toggle');
+				});
+				var close_listPopover = document.getElementById("close_listPopover");
+	            close_listPopover.addEventListener('tap',function(){
+					mui('#listPopover').popover('hide',close_listPopover);
+				});
+				//确定按钮
+				var sure_listPopover =  document.getElementById("sure_listPopover");
+				mui('.list').on('change', 'input', function() {
+				     var value = this.checked?"1":"0";
+				     console.log(this.previousElementSibling.innerText+value);
+				     if(this.previousElementSibling.innerText=="GC高铁/城际") flag_list[0]=value;
+				     if(this.previousElementSibling.innerText=="D动车") flag_list[1]=value;
+				     if(this.previousElementSibling.innerText=="Z字头") flag_list[2]=value;
+				     if(this.previousElementSibling.innerText=="T字头") flag_list[3]=value;
+				     if(this.previousElementSibling.innerText=="K字头") flag_list[4]=value;
+				     if(this.previousElementSibling.innerText=="其他") flag_list[5]=value;
+				     
+			    });
+				sure_listPopover.addEventListener('tap',function(){
+					//先判断点击了哪些按钮					
+					mui('#listPopover').popover('hide',sure_listPopover);				
+					trainList.innerHTML = '';
+					trainlistPopover(dataItems.data.length,flag_list);
+			    });
+			    
+			    
+			    // zhs:2017-01-09修改：筛选
+                var open_selPopover=document.getElementById("open_selPopover")
+                open_selPopover.addEventListener('tap',function(){
+					mui('#selPopover').popover('toggle');
+				});
+				var close_selPopover = document.getElementById("close_selPopover");
+	            close_selPopover.addEventListener('tap',function(){
+					mui('#selPopover').popover('hide',close_selPopover);
+				});
+				//确定按钮
+				var sure_selPopover =  document.getElementById("sure_selPopover");
+				mui('.sel').on('change', 'input', function() {
+				     var value = this.checked?"1":"0";
+				     console.log(this.previousElementSibling.innerText+value);
+				     if(this.previousElementSibling.innerText=="10:00之前") flag_sel[0]=value;
+				     if(this.previousElementSibling.innerText=="10:01-18:00") flag_sel[1]=value;
+				     if(this.previousElementSibling.innerText=="18:01之后") flag_sel[2]=value;				     
+			    });
+				sure_selPopover.addEventListener('tap',function(){
+					//先判断点击了哪些按钮			
+					mui('#selPopover').popover('hide',sure_selPopover);				
+					trainList.innerHTML = '';
+					trainselPopover(dataItems.data.length,flag_sel);
+			    });
+			});
+			
+			
+			/**
+			 * Janine:该方法是调用ajax_get_leftTicket方法，向服务器发出请求，
+             * zhs:修改:get_data()方法中加了“往程车票”的判断
+             */
+            function get_data(){
+                // 这里的json数据是从前一届界面传过来的向服务器申请数据
+                if(tour_flag=="fc"){
+                    //   zhs修改:往程车票信息
+                    console.log("zhs:tour_flag=====>" + tour_flag);
+                    console.log("zhs:back_train_date=====>" + back_train_date);
+                    ajax_get_leftTicket({   
+                        from_station : from_station,
+                        to_station : to_station,
+                        train_date : back_train_date,
+                        purpose_codes : purpose_codes,
+                    });
+                }else{
+                    // Janine:单程车票信息
+                    ajax_get_leftTicket({    
+                        from_station : from_station,
+                        to_station : to_station,
+                        train_date : train_date,
+                        purpose_codes : purpose_codes
+                    }); 
+                }
+            }
+			
+			// 检查用户是否登录
+			function checkUserSuccess(data) {
+				dataItems = data.result; 
+				console.log("function checkUserSuccess---------->进入")
+				// 假如status状态为ture，说明用户已登录
+				if (dataItems.data.flag == true) {
+					// 点击“预订”检查车票信息
+					if(secretStr !="" && secretStr !=null){
+						// 假如从上一届传来的tour_flag是fc-返程
+						if(tour_flag == "fc"){
+							console.log("Janine20170111FC.ajax_submitOrderRequest.传输的所有数据=====》" 
+									+ 'purpose_codes:' + purpose_codes
+									+ ',from_station_name:' + query_from_station_name      // 出发站名字
+									+ ',to_station_name:' + query_to_station_name          // 目的站名字
+									+ ',secretStr:' + secretStr                            // 加密字符串
+									+ ',back_train_date:' + back_train_date  
+									+ ',train_date:' + train_date
+									+ ',tour_flag:' + tour_flag );
+							
+							ajax_submitOrderRequest({
+								purpose_codes : purpose_codes,
+								from_station_name : query_from_station_name,       // 出发站名字
+								to_station_name : query_to_station_name,          // 目的站名字
+								secretStr : secretStr,                            // 加密字符串
+								back_train_date : back_train_date,  
+								train_date : train_date,
+								tour_flag : tour_flag
+							});
+						}else{
+							
+							console.log("Janine20170111.ajax_submitOrderRequest.传输的所有数据=====》" 
+									+ 'purpose_codes:' + purpose_codes
+									+ ',from_station_name:' + query_from_station_name      // 出发站名字
+									+ ',to_station_name:' + query_to_station_name          // 目的站名字
+									+ ',secretStr:' + secretStr                            // 加密字符串
+									+ ',back_train_date:' + back_train_date  
+									+ ',train_date:' + train_date
+									+ ',tour_flag:' + tour_flag );
+							
+							// Janine:假如从上一届传来的tour_flag是dc-单程
+							ajax_submitOrderRequest({
+								purpose_codes : purpose_codes,
+								from_station_name : query_from_station_name,       // 出发站名字
+								to_station_name : query_to_station_name,          // 目的站名字
+								secretStr : secretStr,                            // 加密字符串
+								back_train_date : train_date,					// Janine20170113
+								train_date : train_date,
+								tour_flag : tour_flag,
+							});
+						}
+					}
+						
+				}else{
+	              	   	//打开登录页面          
+  						mui.openWindow({
+    						url:'login.html',
+    						id:'login.html'
+  						});
+					}
+			}
+			
+			//3. 加入查询成功，则调用getleftTicketSuccess(datas)方法，此处获得服务器传过来的数据 “dc、wc“
+			function getleftTicketSuccess(datas) {
+				progressbar.style.display = 'none';
+				//4. 对数据做处理
+				//(1) 首先，判断数据是否获取成功
+				if (datas.result.status == true) {
+					dataItems = datas.result; // 数据赋值:Json字符串
+					//(2) 然后，将真正的关于车票的相关信息赋值个dataItemArr
+					dataItemArr = Object.keys(dataItems.data);
+					console.log("dataItemArr的长度--->" + dataItemArr.length);
+					initTrainTypeData(dataItemArr.length); // 初始化车票类型数据
+					trainType(dataItems, dataItemArr.length);
+				}else{
+					get_data();
+				}
+			}
+			
+			// submitOrderRequestSuccess——检测成功！
+			function submitOrderRequestSuccess(data){
+				if((tour_flag == "dc" ||tour_flag == "wc"||tour_flag == "fc") && secretStr !="" && secretStr !=null){
+					mui.openWindow({
+						url: 'trainDetail_main.html',
+						id: 'trainDetail_main',
+						extras : {
+							// Janine20170113:作为一个标识符传过去
+							tour_flag : tour_flag,
+						}
+					});
+				}
+				// Janine:改签时，页面跳转
+				if(tour_flag == "gc" && secretStr !="" && secretStr !=null){
+					mui.openWindow({
+						url: 'MealAndChange/trainDetailGc_main.html',
+						id: 'trainDetailGc_main',
+						extras : {
+							// Janine20170113:此处的purpose_codes好像传过去没用到
+							purpose_codes:purpose_codes,                     // 人员类型
+						}
+					});
+				}
+			}
+			
+			/**
+			 * Janine:submitOrderRequest检测失败后，重新刷新界面（重新获取数据）
+			 * @param {Object} data
+			 */
+			function submitOrderRequestFalse(data){
+				pulldownRefresh();
+				mui.toast(dataResult.messages);
+			}
+			
+			//初始化车票类型
+			function initTrainTypeData(length) {
+
+				for (var i = 0; i < length; i++) {
+					trainType[i] = [{
+						type: " ",
+						num: "--"
+					}, {
+						type: " ",
+						num: "--"
+					}, {
+						type: " ",
+						num: "--"
+					}, {
+						type: " ",
+						num: "--"
+					}, {
+						type: " ",
+						num: "--"
+					}, {
+						type: " ",
+						num: "--"
+					}, {
+						type: " ",
+						num: "--"
+					}, {
+						type: " ",
+						num: "--"
+					}, {
+						type: " ",
+						num: "--"
+					}, {
+						type: " ",
+						num: "--"
+					}, {
+						type: " ",
+						num: "--"
+					}, {
+						length: "0"
+					}];
+				}
+			}
+
+			//4. 判断出每个车次有什么样的车票类型
+			function trainType(dataItem, length) {
+				for (var i = 0; i < length; i++) {
+
+					dataAll[i] = dataItem.data[i].queryLeftNewDTO; // 查询的到车票的信息
+
+					var j = 0;
+					//(2) 将获得的车票类型，一次放到trainType[]数组中
+					if (dataAll[i].yz_num != "--") {
+						trainType[i][j].type = "硬座:";
+						trainType[i][j].num = dataAll[i].yz_num;
+
+						j++;
+					}
+					if (dataAll[i].rz_num != "--") {
+						trainType[i][j].type = "软座:";
+						trainType[i][j].num = dataAll[i].rz_num;
+
+						j++;
+					}
+					if (dataAll[i].yw_num != "--") {
+						trainType[i][j].type = "硬卧:";
+						trainType[i][j].num = dataAll[i].yw_num;
+
+						j++;
+					}
+					if (dataAll[i].rw_num != "--") {
+						trainType[i][j].type = "软卧:";
+						trainType[i][j].num = dataAll[i].rw_num;
+
+						j++;
+					}
+					if (dataAll[i].gr_num != "--") {
+						trainType[i][j].type = "高级软卧:";
+						trainType[i][j].num = dataAll[i].gr_num;
+
+						j++;
+					}
+
+					if (dataAll[i].ze_num != "--") {
+						trainType[i][j].type = "二等座:";
+						trainType[i][j].num = dataAll[i].ze_num;
+
+						j++;
+					}
+
+					if (dataAll[i].zy_num != "--") {
+						trainType[i][j].type = "一等座:";
+						trainType[i][j].num = dataAll[i].zy_num;
+
+						j++;
+					}
+
+					if (dataAll[i].tz_num != "--") {
+						trainType[i][j].type = "特等座:";
+						trainType[i][j].num = dataAll[i].tz_num;
+
+						j++;
+					}
+
+					if (dataAll[i].swz_num != "--") {
+						trainType[i][j].type = "商务座:";
+						trainType[i][j].num = dataAll[i].swz_num;
+
+						j++;
+					}
+
+					if (dataAll[i].wz_num != "--") {
+						trainType[i][j].type = "无座:";
+						trainType[i][j].num = dataAll[i].wz_num;
+
+						j++;
+					}
+
+					if (dataAll[i].qt_num != "--") {
+						trainType[i][j].type = "其他:";
+						trainType[i][j].num = dataAll[i].qt_num;
+
+						j++;
+					}
+					num = j;
+				}
+				
+				trainResultShowList(length,1);
+				trainHeadShowList(length);
+
+			}
+			//5. 显示头部信息
+			function trainHeadShowList(length) {
+				console.log("显示头部信息显示--->");
+				var dataslist = '';
+				dataslist = dataslist + '<p style="font-size: 15px;color: white;text-align: center;">' + from_station + "-" + to_station + "(共" + length + "趟车)" + '</p>';
+				                        
+				headData.innerHTML = dataslist;
+			}
+
+			// zhs:车站列表顺序显示
+			function trainResultShowList(length,index) {
+				console.log("length--->"+length);
+				console.log("index--->"+index);
+				var finallist = '';
+				if(index==1){
+					console.log("正序显示");
+					for (i = 0; i < length; i++) {
+					    finallist=trainResultShowReverse(i,finallist);
+				    }
+				}else{
+					console.log("倒序显示");
+					for (i =length-1; i >0 ; i--) {
+					    finallist=trainResultShowReverse(i,finallist);
+				    }
+				}
+				
+				trainList.innerHTML = finallist;
+			}
+			
+			
+			// zhs:2017-01-06修改：选择车型后，按照选择后的车型显示车票详情
+			function trainlistPopover(length,flag_list){
+				console.log("进入trainlistPopover--------》")
+				var finallist='';
+				for(var i=0;i<length;i++){
+					if(dataAll[i].station_train_code.indexOf('G')!=-1 && (flag_list[0]==1)){ 
+	                	finallist=trainResultShowReverse(i,finallist);		                	    
+	                }if((dataAll[i].station_train_code.indexOf('D')!=-1)&&flag_list[1]==1){  
+	                	finallist=trainResultShowReverse(i,finallist);		
+	                }if((dataAll[i].station_train_code.indexOf('Z')!=-1)&&flag_list[2]==1){ 
+	                	finallist=trainResultShowReverse(i,finallist);		
+	                }if((dataAll[i].station_train_code.indexOf('T')!=-1)&&flag_list[3]==1){ 
+	                	finallist=trainResultShowReverse(i,finallist);		
+	                }if((dataAll[i].station_train_code.indexOf('K')!=-1)&&flag_list[4]==1){   
+                	    finallist=trainResultShowReverse(i,finallist);	
+	                }if((dataAll[i].station_train_code.indexOf('其它 ')!=-1)&&flag_list[5]==1){
+	                	finallist=trainResultShowReverse(i,finallist);	   
+	                }
+				}
+				
+				trainList.innerHTML = finallist;				        
+			}
+			
+			
+			// zhs:2017-01-06修改：筛选时间段
+			function trainselPopover(length,flag_sel){
+				console.log("进入trainselPopover--------》")
+				var finallist='';
+				for(var i=0;i<length;i++){
+					if(dataAll[i].start_time.localeCompare("10:00")<0 && flag_sel[0]==1){ 
+	                	finallist=trainResultShowReverse(i,finallist);		                	    
+	                }
+					if((dataAll[i].start_time.localeCompare("10:01")>0 && dataAll[i].start_time.localeCompare("18:00")<0) && flag_sel[1]==1){
+	                	finallist=trainResultShowReverse(i,finallist);		
+	                }
+	                if((dataAll[i].start_time.localeCompare("18:00")>0) && flag_sel[2]==1){
+	                	finallist=trainResultShowReverse(i,finallist);		
+	                }
+				}
+				trainList.innerHTML = finallist;				        
+			}
+
+			//6.车站列表显示
+			function trainResultShowReverse(i,finallist) {
+				finallist = finallist + '<li class="mui-table-view-cell"><div class="mui-table"><a href="#"><div class="mui-table-cell mui-col-xs-2 "><p>'
+									+ dataAll[i].start_time + '</p><p>' + dataAll[i].arrive_time + '</p><p>' + trainType[i][0].type + trainType[i][0].num 
+									+ '</p></div><div class="mui-table-cell mui-col-xs-2 "><p>'
+									+ dataAll[i].station_train_code + '</p><p >' + dataAll[i].lishi + '</p><p>' + trainType[i][1].type + trainType[i][1].num 
+									+ '</p></div><div class="mui-table-cell mui-col-xs-2"><p>'
+									+ dataAll[i].from_station_name + '</p><p>' + dataAll[i].to_station_name + '</p><p>' + trainType[i][2].type + trainType[i][2].num 
+									+ '</p></div><div class="mui-table-cell mui-col-xs-2"><br />'
+					
+					// Janine:除了“预订”,其余都显示灰色
+					if(dataItems.data[i].buttonTextInfo == "列车运行图调整，暂停发售" || dataItems.data[i].buttonTextInfo == "列车停运"){
+						
+						finallist = finallist +'<button data-id="' + i + '"  type="button" class="mui-btn mui-btn-outlined mui-pull-right" style="margin-top:-5px;margin-right: -35px;">'
+									+ dataItems.data[i].buttonTextInfo.substr(0,6)+ '<br/>'
+									+ dataItems.data[i].buttonTextInfo.substr(6,dataItems.data[i].buttonTextInfo.length-1)
+									+ '</button></div></a></div></li>';
+									
+					}else if(dataItems.data[i].buttonTextInfo.substr(0,2) == "暂售"){
+						
+						finallist = finallist +'<button data-id="' + i + '" type="button" class="mui-btn mui-btn-outlined mui-pull-right" style="margin-top:-5px;margin-right: -35px;">'
+									+ dataItems.data[i].buttonTextInfo.substr(0,3)
+									+ dataItems.data[i].buttonTextInfo.substr(3,dataItems.data[i].buttonTextInfo.length-1)
+									+ '</button></div></a></div></li>';
+									
+					}else if(dataItems.data[i].buttonTextInfo.substr(dataItems.data[i].buttonTextInfo.length-2,dataItems.data[i].buttonTextInfo.length-1) == "起售"){
+						// Janine:先获取“日”字的
+						var buttonStr = dataItems.data[i].buttonTextInfo.indexOf("日");
+						finallist = finallist +'<button data-id="' + i + '" type="button" class="mui-btn mui-btn-outlined mui-pull-right" style="margin-top:-5px;margin-right: -35px;">'
+									+ dataItems.data[i].buttonTextInfo.substr(0,buttonStr)
+									+ dataItems.data[i].buttonTextInfo.substr(buttonStr,dataItems.data[i].buttonTextInfo.length-1)
+									+ '</button></div></a></div></li>';
+									
+					}else{
+						if(dataItems.data[i].secretStr !="" && dataItems.data[i].secretStr !=null){
+							finallist = finallist +'<button data-id="' + i + '" type="button" class="mui-btn mui-btn-primary mui-pull-right" style="margin-top:-5px;margin-right: -35px;">'
+									+ dataItems.data[i].buttonTextInfo + '</button></div></a></div></li>';
+						}else{
+							finallist = finallist +'<button data-id="' + i + '" type="button" class="mui-btn mui-pull-right" style="margin-top:-5px;margin-right: -35px;">'
+									+ dataItems.data[i].buttonTextInfo + '</button></div></a></div></li>';
+						}
+						
+						
+					}
+				return finallist;
+			}
+
+			//zhs:-----------------> 
+			function forward(){
+                var timt=getBeforeDay(train_date,1,false).split(" ");
+                console.log(timt[0]);
+                train_date=timt[0];
+                date_time.innerHTML=timt[0];
+                localStorage.setItem("Detail_train_date",train_date);
+                if(date_time!=(CurentTime(0).split(" "))[0]){
+                	//向服务器申请数据
+                	trainList.innerHTML="";
+			        get_data();
+                }                
+		    }
+        
+	        function back(){
+	            var timt=getAfterDay(train_date,1,false).split(" ");
+	            train_date=timt[0];
+	            localStorage.setItem("Detail_train_date",train_date);
+	            date_time.innerHTML=timt[0];
+	            trainList.innerHTML="";
+	            get_data();
+			}	
+		
+			//zhs ----------------->
+
+
+			// Janine:将下面的“时间顺序”、“车型选择”和“筛选”后，下拉刷新正常执行，实现下拉列表刷新
+			function pulldownRefresh() {
+				setTimeout(function() {
+					console.log("进入下拉刷新--->");
+					//2. 调用ajax_get_leftTicket方法，向服务器发出请求，这里的json数据是从前一届界面传过来的
+					get_data();
+					mui('#pullrefresh').pullRefresh().endPulldownToRefresh(); // 注意，加载完新数据后，必须执行如下代码，注意：若为ajax请求，则需将如下代码放置在处理完ajax响应数据之后
+				}, 1000);
+			}
+			
+		</script>
+	</body>
+
+</html>

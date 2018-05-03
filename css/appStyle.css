@@ -1,0 +1,89 @@
+/*
+ * 关于app的相应样式
+ */
+
+body {
+	background-color: #fff;
+}
+
+
+/*Janine.Z:mui的标题的样式重构*/
+
+.mui-title {
+	font-family: "微软雅黑";
+	font-style: normal;
+}
+
+
+/*Janine.Z:mui的mbody的样式重构*/
+
+.mui-content {
+	margin-top: -20px;
+	background-color: #fff;
+}
+
+.mui-content-padded {
+	background-color: #fff;
+}
+
+
+/*Janine.Z:mui的按钮的样式重构*/
+
+.mui-btn {
+	width: 100%;
+	padding-top: 10px;
+	padding-bottom: 10px;
+	font-size: 20px;
+	background-color: #3889d8;
+}
+
+.time {
+	margin-top: 12px;
+}
+
+
+/*Janine.Z:出发站和目的站的样式*/
+
+.station {
+	border-bottom: 1px solid #333333;
+	color: #333333;
+}
+
+
+/*Janine.Z:历史记录的样式*/
+
+.history_record {
+	height: 12px;
+	border-bottom: 1px solid #ddd;
+	text-align: center;
+}
+
+
+/*Janine.Z:历史记录的中的span的标签的样式*/
+
+.history_record span {
+	position: relative; //相对布局
+	top: -50px;
+	line-height: -200px;
+	background: #FFFFFF;
+	padding: 2px 5px;
+	color: #6f6f6f;
+	font-size: 14pt;
+}
+
+#main {
+	position: relative;
+}
+
+.box {
+	padding: 15px 0 0 15px;
+	float: left;
+}
+
+.record {
+	padding: 10px;
+	border: 1px solid #ccc;
+	border-radius: 5px;
+	box-shadow: 0 0 5px #ccc;
+}
+

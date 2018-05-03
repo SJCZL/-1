@@ -1,0 +1,326 @@
+<!doctype html>
+<html>
+
+	<head>
+		<meta charset="UTF-8">
+		<title>票价查询</title>
+		<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+		<link href="../css/mui.min.css" rel="stylesheet" />
+		<link href="../css/appStyle.css" rel="stylesheet" />
+		<style type="text/css">
+			 .button{
+				height:45px;
+				margin-top: 7%;
+				margin-bottom: 7%;
+		    }
+		    .myList {
+			    background: url(../img/arrow_down.png) right center no-repeat; 
+			    width: 150%;
+			    overflow: hidden;
+			    border: solid 1px #ccc;
+			    margin-left: -60%;
+			    margin-right: -5%;
+			   
+			}
+			#myList{
+			    -webkit-appearance:none;
+			    -moz-appearance:none;
+			    appearance:none;
+			    background:transparent;
+			    border:none;
+			    padding-left:5%;
+			    margin-bottom: -10%;
+			    margin-top: -5%;
+			    position:relative;
+			}
+		</style>
+	</head>
+
+	<body>
+		<div class="mui-content">
+		    <ul class="mui-table-view  mui-table-view-striped mui-table-view-condensed">
+				<li class="mui-table-view-cell">
+					<div class="mui-table">
+						<div class="mui-table-cell mui-text-center">
+							<p>
+								<div >
+									<font id="from_Station" color="#c6c6c6">出发站</font>
+								</div>
+							</p>
+							<a id="fromtag" class='mui-ellipsis'>
+								<div style="padding-top: 15%;">
+									<font id="fromStation" class="station">石家庄</font>
+								</div>
+							</a>
+						</div>
+						<div class="mui-table-cell mui-text-center">
+							<br />
+							<a id="change_station" class='mui-ellipsis' href="#">
+								<img src="../img/arrow01.png">
+							</a>
+						</div>
+						<div class="mui-table-cell mui-text-center">
+							<p>
+								<div >
+									<font id="to_Station" color="#c6c6c6">目的站</font>
+								</div>
+							</p>
+							<a id='totag' class='mui-ellipsis'>
+								<div style="padding-top: 15%;">
+									<font id="toStation" class="station">北京</font>
+								</div>
+							</a>
+						</div>
+
+					</div>
+				</li>
+			</ul>
+			<ul class="mui-table-view">
+				<li class="mui-table-view-cell" style="margin-right: 4%;">
+		             <div class="mui-table" style="font-size: 14px;">
+						<div class="mui-table"  >
+							<div class="mui-table-cell mui-col-xs-2">
+								乘车日期：	
+							</div>
+							<div  class="mui-table-cell mui-col-xs-2 " style="">
+								<div style="margin-left: -45%;">
+									<button id="date_time"  style="margin-top: -6%;margin-bottom: -3%;width:80%;">
+										<!--<font style="font-size: 18px;">2016-06-14</font>
+										<img src="../../img/calendar.png" style="margin:-2% 0 -4% 10%; "/>-->
+									</button>
+								</div>
+						    </div>
+						</div>     
+					   <div  class="mui-table-cell mui-col-xs-2 ">
+							<div style="margin-left:-30%;">类型：</div>
+						</div>
+						<div  class="mui-table-cell mui-col-xs-2 ">
+							<div class="mui-card myList "  >
+								<select id="myList" name="myList"  onchange="favBrowser()">
+									<option value="0" >成人票</option>
+									<option value="0" >儿童票</option>
+									<option value="1" >学生票</option>
+									<option value="0" >残军票</option>
+								</select>
+							</div>
+					   </div>
+					</div>           
+		        </li>
+		        <li class="mui-table-view-cell" style="margin-right: 4%;">
+		            <div class="mui-table" style="font-size: 14px;">
+						<div  class="mui-table-cell mui-col-xs-2 ">
+							<div >验证码：</div>
+						</div>
+						<div  class="mui-table-cell mui-col-xs-2 ">
+							<div class="mui-input-row" style="margin-left: -40%;">
+							    <input id="randCode" type="text"  name="randCode" style="width: 90%; margin-bottom:0%;">
+							</div>
+					    </div>
+					    <div  class="mui-table-cell mui-col-xs-2 ">
+							<div class="mui-input-row" style="margin-left: -0%; width: 80%;">
+							    <img src="" id="captcha" > 
+							</div>
+					    </div>
+					    <div  class="mui-table-cell mui-col-xs-2 " >
+							<div class="mui-input-row" >
+							    <button  id="change" style="font-size: 8px;" >换一张</button>
+							</div>
+					    </div>     
+		       </li>
+			</ul>
+			<div class="mui-content-padded" align="center">
+				<button id="queryButton" type="button" class="mui-btn mui-btn-blue">查询</button>
+			</div>
+		</div>
+		<script src="../js/mui.min.js"></script>
+		<script type="text/javascript" src="../js/guide.js" ></script>
+		<script type="text/javascript" src="../js/jquery-1.11.1.js" ></script>
+		<script type="text/javascript" src="../js/date_time.js" ></script>
+		<script type="text/javascript">
+		    var fromStation;
+		    var toStation;
+		    var date_time;
+		    var randCode;
+			var change;
+			
+			var fromtag;
+			var totag;
+			var time;
+			var type="成人票";
+			var type_node;
+			mui.init();
+			mui.plusReady(function(){
+				ajax_getPassCodeNew({});
+				
+				fromStation=document.getElementById('fromStation');
+				toStation=document.getElementById('toStation');
+				date_time=document.getElementById('date_time');
+				randCode=document.getElementById('randCode');
+				change=document.getElementById('change');
+				fromtag=document.getElementById("fromtag");
+			    totag=document.getElementById("totag");
+			    
+				//取出本地的存储值并赋值
+				if (localStorage.getItem('ticketPriceQuery_fromStation')) {
+					fromStation.innerText= localStorage.getItem('ticketPriceQuery_fromStation');
+				}
+				if (localStorage.getItem('ticketPriceQuery_toStation')) {
+					toStation.innerText= localStorage.getItem('ticketPriceQuery_toStation');
+				}
+				date_time.innerHTML=set_dateTime(get_date_time());
+				
+				
+				//点击出发地选择出发地车站
+				fromtag.addEventListener('tap', function(){	
+					var address="guide/ticketPriceQuery_needtem.html";  // 返回数据时的地址
+					mui.openWindow({
+						url: '../html/station.html',
+						id: '../html/station.html',
+						extras:{
+							station:"出发站",
+						    address:address,
+						    title:'票价查询',
+						}
+					})
+				})
+				
+				//点击目的地选择目的地车站
+				totag.addEventListener('tap', function(){				
+					mui.openWindow({
+						url: '../html/station.html',
+						id: '../html/station.html',
+						extras:{
+							station:"目的站",
+						    address:"guide/ticketPriceQuery_needtem.html",
+						    title:'票价查询',
+						}
+					})
+				})
+				
+				//点击乘车日期，获取乘车日期
+				date_time.addEventListener('tap', function() {
+					mui.openWindow({
+						url: '../html/calendar.html',
+						id: '../html/calendar.html',
+						extras:{
+							data : "guide/ticketPriceQuery_needtem.html",
+							title:"票价查询",
+						}
+				   });
+				});
+				
+				var currentWebview = plus.webview.currentWebview();
+				var parentWebview = currentWebview.parent();
+				mui.fire(parentWebview ,'getCategoryID',{});
+				window.addEventListener('postCategoryID',function(e){
+					console.log(e.detail.title_name);
+					console.log(e.detail.station_name);
+				    if(typeof(e.detail.data_time)!="undefined")
+					    date_time.innerHTML=set_dateTime(e.detail.data_time);
+					if(typeof(e.detail.station_name)!="undefined"){  //如果在选择车站时，没有点击任何时间值，则返回的值为空
+		                if(e.detail.title_name=="出发站"){
+		                	fromStation.innerText=e.detail.station_name;
+		                	//把接收到的值放入ticketPriceQuery_fromStation为地址的内存中，这样使得再次到这个页面的时候不至于把数据清除
+		                	localStorage.setItem('ticketPriceQuery_fromStation',e.detail.station_name); 
+		                }else if(e.detail.title_name=="目的站"){
+		                	toStation.innerText=e.detail.station_name;
+		                	localStorage.setItem('ticketPriceQuery_toStation',e.detail.station_name);
+		                }  
+		           }
+			    });
+				
+			    
+				var change_station=document.getElementById('change_station');
+				//交换出发站和目的站
+				change_station.addEventListener('tap', function() { 
+					var temp;
+			    	temp = fromStation.innerText;
+			    	fromStation.innerText = toStation.innerText;
+			    	toStation.innerText = temp;
+				}); 
+				
+				//换一张验证码
+				change.addEventListener('tap', function() { 
+					ajax_getPassCodeNew({});
+				}); 
+				
+				var queryButton=document.getElementById("queryButton");
+				//查询按钮
+				queryButton.addEventListener('tap', function(){				
+					ajax_checkForGuide({
+						randCode:randCode.value,
+					}); 
+				})
+			})
+			
+			
+			//填充时间
+			function set_dateTime(data){
+				time=data;
+				console.log(data);
+				var list='';
+				list=list+  '<font style="font-size: 14px;">'+data+'</font>'+
+							'<img src="../img/calendar.png" style="margin:-2% 0 -4% 10%; "/>';
+				return list;
+			}
+			
+			//成功获取验证码
+			function getPassCodeNewSuccess(data){
+				console.log("getPassCodeNewSuccess.进入--->");
+				console.log("getPassCodeNewSuccess.JSON.stringify(data)--->" + JSON.stringify(data.result));
+				//captcha位置显示验证码
+				$("#captcha").attr("src", data.result.imgUrl);
+	    	    $("#randCode").val("");					
+			}
+			
+			//成功验证验证码
+			function checkForGuideSuccess(data){
+				console.log("checkForGuideSuccess.进入--->");
+				console.log("checkForGuideSuccess.JSON.stringify(data)--->" + JSON.stringify(data.data.result));
+				console.log(date_time.value);
+				if(type=="成人票"){
+					type_node=1;
+				}else if(type=="儿童票"){
+					type_node=2;
+				}else if(type=="学生票"){
+					type_node=3;
+				}else if(type=="残军票"){
+					type_node=4;
+				}
+				ajax_ticketPriceQuery({
+		            purpose_codes : type_node,
+                    train_date : time,
+                    from_station : fromStation.innerText,
+                    to_station : toStation.innerText,
+                    randCode : randCode.value
+				}); 
+			}
+			
+			//查询成功
+			function ticketPriceQuerySuccess(data){
+				console.log("ticketPriceQuerySuccess--->进入")
+				if(data.status==true&&data.messages==" "){ //当查询成功并且没有错误提示时跳转
+					mui.openWindow({
+						url: 'ticketPriceQueryDetail.html',
+						id: 'ticketPriceQueryDetail.html',
+						extras:{
+							data : data,
+							from_station : fromStation.innerText,
+                            to_station : toStation.innerText,
+						}
+				    });
+				}
+				if(data.messages!=" ")  //如果错误提示不为空，则输出错误提示
+				    alert(data.messages);
+			}
+			
+			//获取菜单列表中选择的值
+			function favBrowser(){   
+				var mylist=document.getElementById("myList");
+                type=mylist.options[mylist.selectedIndex].text;
+                console.log(type);
+			}
+		</script>
+	</body>
+
+</html>

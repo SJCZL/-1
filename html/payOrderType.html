@@ -1,0 +1,236 @@
+<!doctype html>
+<html>
+
+	<head>
+		<meta charset="UTF-8">
+		<title></title>
+		<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+		<link href="../css/mui.min.css" rel="stylesheet" />
+		<style>
+			.mui-btn {
+				width: 100%;
+				height:50px;
+				font-size: 25px;
+			}
+		</style>
+	</head>
+
+	<body>
+		<header class="mui-bar mui-bar-nav">
+			<a class="mui-action-back mui-icon mui-icon-left-nav mui-pull-left">订单</a>
+		    <h1 class="mui-title">请您支付</h1>
+		</header>
+		<div class="mui-content">
+		    <ul  class="mui-table-view" style="margin-top: 0px;">
+		    	<li class="mui-table-view-cell" >
+					<div class="mui-table">
+						<div class="mui-table-cell mui-col-xs-2 mui-text-left">
+							<p id="ticket_price_total" style="font-size: 16px;"></p>
+						</div>
+					</div>
+				</li>
+				<li class="mui-table-view-cell" >
+					<div class="mui-input-row mui-radio mui-left">
+						<label>工商银行</label>
+						<input name="radio1" id="gsyh" type="radio">
+					</div>
+					<div class="mui-input-row mui-radio mui-left">
+						<label>农业银行</label>
+						<input name="radio1" id="nyyh" type="radio">
+					</div>
+					<div class="mui-input-row mui-radio mui-left">
+						<label>中国银行</label>
+						<input name="radio1" id="zgyh" type="radio">
+					</div>
+					<div class="mui-input-row mui-radio mui-left">
+						<label>建设银行</label>
+						<input name="radio1" id="jsyh" type="radio">
+					</div>
+					<div class="mui-input-row mui-radio mui-left">
+						<label>招商银行</label>
+						<input name="radio1" id="zsyh" type="radio">
+					</div>
+					<div class="mui-input-row mui-radio mui-left">
+						<label>中国银联</label>
+						<input name="radio1" id="zgyl" type="radio">
+					</div>
+					<div class="mui-input-row mui-radio mui-left">
+						<label>中铁银通卡</label>
+						<input name="radio1" id="ztytk" type="radio">
+					</div>
+					<div class="mui-input-row mui-radio mui-left">
+						<label>支付宝</label>
+						<input name="radio1" id="Alipay" type="radio" class="mui-selected" checked>
+					</div>
+				</li>
+			</ul>
+			<span id='progressbar' class="mui-spinner" style="position: absolute;left: 45%;top:250px;"></span>
+			<div class="mui-content-padded" align="center">
+		        <button type="button" class="mui-btn mui-btn-blue " id="paySubmitBtn">提交支付</button>
+	        </div>
+		</div>
+		
+		<script src="../js/mui.min.js"></script>
+		<script src="../js/ajax.js" charset="UTF-8"></script>
+		<script type="text/javascript">
+			mui.init();
+			
+			var selfWebView;
+			var ticket_price_total;
+			
+			// 获取网上支付相关的参数
+			var tranData;
+			var	merSignMsg; 
+			var	appId;
+			var	transType;
+			var	channelId;
+			var	merCustomIp;
+			var	orderTimeoutDate;
+			
+			var progressbar;
+			var Dticket_price_total;
+			var paySubmitBtn;
+			mui.plusReady(function() {
+				
+				// 获取网上支付相关的参数
+				ajax_payGateway({});
+				
+				selfWebView = plus.webview.currentWebview();                               // 获取当前页面
+				progressbar = document.getElementById('progressbar');
+				Dticket_price_total = document.getElementById('ticket_price_total');       // 应付金额控件
+				Dticket_price_total.innerHTML ="应付金额" + '&nbsp;'+":"+"&nbsp;&nbsp;" + selfWebView.ticket_price_total+"元" ;      // 设置参数
+				paySubmitBtn = document.getElementById('paySubmitBtn');
+			});
+			
+			// 获取网上支付相关的参数成功后，调用          
+			function payGatewaySuccess(data){
+				console.log("payGatewaySuccess.进入--->");
+				progressbar.style.display = 'none';
+				paySubmitClick(data);
+				
+			}
+		/*	工商银行 ：01020000		农业银行 ：01030000
+			中国银行 ：01040000		建设银行 ：01050000
+			招商银行 ：03080000		中国银联 ：00011000
+			中铁银通卡 ：00011001          支付宝 ：33000010*/
+
+			function paySubmitClick(data){
+				console.log("paySubmitClick.进入--->");
+				paySubmitBtn.addEventListener('tap',function(){
+					console.log("Janine:进到此处没？--->");
+					if(document.getElementById('gsyh').checked) {
+						alert("选中工商银行");
+						// 提交支付方式
+						ajax_webBusiness({
+							tranData : data.tranData,
+							merSignMsg : data.merSignMsg,
+							appId : data.appId,
+							transType : data.transType,
+							channelId : data.channelId,
+							merCustomIp : data.merCustomIp,
+							orderTimeoutDate : data.orderTimeoutDate,
+							bankId : "01020000"
+						});
+					}else if(document.getElementById('nyyh').checked) {
+						alert("选中农业银行");
+						ajax_webBusiness({
+							tranData : data.tranData,
+							merSignMsg : data.merSignMsg,
+							appId : data.appId,
+							transType : data.transType,
+							channelId : data.channelId,
+							merCustomIp : data.merCustomIp,
+							orderTimeoutDate : data.orderTimeoutDate,
+							bankId : "01030000"
+						});
+					}else if(document.getElementById('zgyh').checked) {
+						alert("选中中国银行");
+						ajax_webBusiness({
+							tranData : data.tranData,
+							merSignMsg : data.merSignMsg,
+							appId : data.appId,
+							transType : data.transType,
+							channelId : data.channelId,
+							merCustomIp : data.merCustomIp,
+							orderTimeoutDate : data.orderTimeoutDate,
+							bankId : "01040000"
+						});
+					}else if(document.getElementById('jsyh').checked) {
+						alert("选中建设银行");
+						ajax_webBusiness({
+							tranData : data.tranData,
+							merSignMsg : data.merSignMsg,
+							appId : data.appId,
+							transType : data.transType,
+							channelId : data.channelId,
+							merCustomIp : data.merCustomIp,
+							orderTimeoutDate : data.orderTimeoutDate,
+							bankId : "01050000"
+						});
+					}else if(document.getElementById('zsyh').checked) {
+						alert("选中招商银行");
+						ajax_webBusiness({
+							tranData : data.tranData,
+							merSignMsg : data.merSignMsg,
+							appId : data.appId,
+							transType : data.transType,
+							channelId : data.channelId,
+							merCustomIp : data.merCustomIp,
+							orderTimeoutDate : data.orderTimeoutDate,
+							bankId : "03080000"
+						});
+					}else if(document.getElementById('zgyl').checked) {
+						alert("选中中国银联");
+						ajax_webBusiness({
+							tranData : data.tranData,
+							merSignMsg : data.merSignMsg,
+							appId : data.appId,
+							transType : data.transType,
+							channelId : data.channelId,
+							merCustomIp : data.merCustomIp,
+							orderTimeoutDate : data.orderTimeoutDate,
+							bankId : "00011000"
+						});
+					}else if(document.getElementById('ztytk').checked) {
+						alert("选中中铁银通卡");
+						ajax_webBusiness({
+							tranData : data.tranData,
+							merSignMsg : data.merSignMsg,
+							appId : data.appId,
+							transType : data.transType,
+							channelId : data.channelId,
+							merCustomIp : data.merCustomIp,
+							orderTimeoutDate : data.orderTimeoutDate,
+							bankId : "00011001"
+						});
+					}else if(document.getElementById('Alipay').checked) {
+					//	alert("选中支付宝");//20170104
+						ajax_webBusiness({
+							tranData : data.tranData,
+							merSignMsg : data.merSignMsg,
+							appId : data.appId,
+							transType : data.transType,
+							channelId : 5,//20170104
+							merCustomIp : data.merCustomIp,
+							orderTimeoutDate : data.orderTimeoutDate,
+							bankId : "33000010"
+						});
+					}
+				});
+				
+			}
+			
+			function webBusinessSuccess(data){
+				console.log("Janine:webBusinessSuccess.data--->" + data);
+				mui.openWindow({
+						url: 'payWebBusiness.html',
+						id: 'payWebBusiness.html',
+						extras:{
+							webBusinessData : data,
+						}
+					});
+			}
+		</script>
+	</body>
+
+</html>

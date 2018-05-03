@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html>
+
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+		<title></title>
+		<link rel="stylesheet" type="text/css" href="../css/mui.min.css" />
+		<link rel="stylesheet" type="text/css" href="../css/own.css" />
+		<style type="text/css">
+			/* 下面两项是重置muicss的输入框label和input之间的宽比率  */
+			.mui-input-row label {
+				width: 20%;
+			}
+			
+			.mui-input-row label~input {
+				width: 80%;
+			}
+			
+			.touclick-wrapper {
+				background-color: #fff;
+				border: 2px solid #e3e1de;
+				margin: 8px;
+				position: relative;
+				width: 313px;
+			}
+			
+			.touclick-reload-normal {
+				background-position: 0 0;
+			}
+			
+			.touclick-reload {
+				cursor: pointer;
+				height: 25px;
+				left: 246px;
+				position: absolute;
+				top: 3px;
+				width: 54px;
+			}
+			
+			.touclick-hov {
+				background-position: 0 -96px;
+				font-size: 0;
+				height: 27px;
+				position: absolute;
+				width: 27px;
+			}
+			
+			.touclick-bgimg {
+				background-image: url("../img/captcha.png");
+			}
+		</style>
+	</head>
+
+	<body>
+		<header class="mui-bar mui-bar-nav">
+			<button type="button" class="mui-action-back mui-btn  mui-btn-link mui-pull-left own-button">
+            <span class="mui-action-back mui-icon mui-icon-left-nav own-left-nav-color"><font style="font-size: 18px;">返回</font></span>
+        </button>
+			<h1 class="mui-title">登录</h1>
+		</header>
+
+		<div class="mui-content">
+			<div style="margin-top: 30px; text-align: center;">
+				<span class="mui-icon mui-icon-person" style="font-size: 4em; border: 2px solid gray; border-radius: 50%; color: gray;"></span>
+			</div>
+			<div class="mui-card" style="margin-top: 20px;">
+				<form class="mui-input-group">
+					<div class="mui-input-row">
+						<label><span class="mui-icon iconfont "></span></label>
+						<input id="username" type="text" class="mui-input-clear" value="" placeholder="请输入用户名" />
+					</div>
+					<div class="mui-input-row">
+						<label><span class="mui-icon iconfont "></span></label>
+						<input id="password" type="password" class="mui-input-clear" value="" placeholder="请输入密码" />
+					</div>
+				</form>
+			</div>
+			<div id="codediv" style="display:none;">
+				<div style="margin:8px;padding-left: 10px; padding-top: 10px;">验证码：</div>
+				<div class="touclick-wrapper" style="margin-left: 5%;">
+					<div id="touclick" class="touclick-bgimg touclick-reload touclick-reload-normal" ></div>
+					<img src="" id="captcha" onclick="getPos(this,event)">
+					<div id="touclick-list"></div>
+				</div>
+			</div>
+			<div class="mui-button-row" style="margin: 10px 15px;">
+				<input id="randCode" type="hidden" name="randCode" value="">
+				<button id="login" type="button" class="mui-btn mui-btn-blue mui-btn-block" style="padding: 5px 0px;">登录</button>
+			</div>
+			<div class="mui-button-row" style="padding-top: 0px;">
+				<button id="register" type="button" class="mui-btn mui-btn-link own-main-color own-font-size" style="padding-top: 0px; margin-right: 60px; ">快速注册</button>
+				<button id="repsd" type="button" class="mui-btn mui-btn-link own-font-size" style="padding-top: 0px; margin-left: 60px; color: #FF6A6A;">忘记密码</button>
+			</div>
+		</div>
+
+		<script src="../js/mui.min.js"></script>
+		<script src="../js/ajax.js" charset="UTF-8"></script>
+		<script type="text/javascript" src="../js/jquery-1.8.3.min.js"></script>
+		<script type="text/javascript" charset="UTF-8">
+			mui.init({
+				swipeBack: true,
+				/**
+				 * 2016-08-25
+				 * Janine:mui.back()——页面重新加载
+				 */
+				beforeback: function(){
+					var wobj = plus.webview.getWebviewById( plus.runtime.appid );
+					//触发前往页面的自定义事件（例：AddNew）,从而进行数据刷新
+					mui.fire(wobj,'AddNew');
+					
+					// 针对车票列表进行刷新
+					var list  = plus.webview.getWebviewById('trainResultShow_main');
+					// 触发前往页面的自定义事件（例：refresh）,从而进行数据刷新
+					mui.fire(list ,'refresh');
+					
+					//返回true，继续页面关闭逻辑
+					return true;
+				}
+			});
+			
+			// Janine:接收input控件的值的变量
+			var username;       
+			var pwd;
+			
+			var loginBtn;       // 登录按钮
+			var register;       // 注册控件
+			var repsd;          // 忘记密码
+			var dataItem;       // 等于result的值
+			var loginWebview;   // 当前控件
+
+			mui.plusReady(function() {
+				
+				// Janine:首先,刚进到该界面时,就要获取验证码
+				ajax_getPassCodeNew({});
+				ajax_checkUser({});
+				
+				// Janine:获取必要的控件,如:登录按钮
+				loginBtn = document.getElementById('login');    
+				loginWebview = plus.webview.currentWebview();               // 获取当前页面
+				
+				register = document.getElementById('register');
+				repsd = document.getElementById('repsd');
+				
+				touclick = document.getElementById('touclick');             // 触摸点击 
+
+				// Janie:登录的点击事件
+				loginBtn.addEventListener('tap', function() {
+					console.log("Janine:loginBtn.进入--->");
+					
+					// Janine:获取input中的数据
+					username = $("#username").val();      
+					pwd = $("#password").val();
+					console.log("Janine:loginBtn--->"
+						+ "username:" + username
+						+ ",pwd:" + pwd);
+					var toastMSG;
+					// 首先,判断账号密码是否为空
+					if ((username == "" || username == null) && (pwd == "" || pwd == null)) {
+						toastMSG = '请输入账号和密码！';
+						mui.toast(toastMSG);
+						ajax_getPassCodeNew({});
+						return;
+					} 
+					if (username == "" || username == null) {
+							toastMSG = '请输入账号';
+							mui.toast(toastMSG);
+							ajax_getPassCodeNew({});
+							return;
+					} 
+					
+					if (pwd == "" || pwd == null) {
+						toastMSG = '密码不能为空';
+						mui.toast(toastMSG);
+						ajax_getPassCodeNew({});
+						return;
+					}
+					ajax_checkForLogin({}); // Janine:检测登录时的,验证码是否正确
+
+				}, false);
+
+				touclick.addEventListener('tap', function() {
+					console.log("Janine:touclick.进入--->");
+					ajax_getPassCodeNew({}); // 获取验证码
+				});
+			});
+
+			// Janine:取消选中的图片
+			function cancel(index) {
+				$("#randCode").val("");
+				var xy = "";
+				$('.touclick-hov').each(function() {
+					var thisIndex = $(this).attr("index");
+					if (index == thisIndex) {
+						$(this).remove();
+					} else {
+						var x = $(this).css("left");
+						var y = $(this).css("top");
+						x = x.substring(0, x.indexOf("px"));
+						y = y.substring(0, y.indexOf("px"));
+						xy += x + "," + y + ",";
+					}
+				});
+				if (xy != "") {
+					xy = xy.substring(0, xy.length - 1);
+					$("#randCode").val(xy);
+				}
+			}
+
+			// 获取验证码位置放在temp中
+			function getPos(o, e) {
+				console.log("getPos.进入--->");
+				var x = e.offsetX;
+				var y = e.offsetY;
+				console.log("getPos.x,y--->" + x + "," + y);
+				var len = $(".touclick-hov").length;
+				console.log("getPos.len--->" + len);
+				$("#touclick-list").append("<div class='touclick-hov touclick-bgimg' index='" + len +
+					"' style='left:" + x + "px; top:" + y + "px;' onclick='cancel(" + len + ")'></div>");
+				var xy = $("#randCode").val();
+				console.log("getPos.len--->" + xy);
+				var temp = x + "," + y;
+				console.log("getPos.temp1--->" + temp);
+				if (xy != "") {
+					temp = xy + "," + temp;
+					console.log("getPos.temp2--->" + temp);
+				}
+				$("#randCode").val(temp);
+			}
+
+			// 获取验证码正确
+			function getPassCodeNewSuccess(data) {
+				if (data.flag == true) {
+					console.log("getPassCodeNewSuccess.进来--->");
+					dataItem = data.result;
+					console.log("Janine:dataItem.imgUrl--->"+dataItem.imgUrl);
+					//captcha位置显示验证码
+					$("#captcha").attr("src", dataItem.imgUrl);
+					//将 id 为 touclick-list的元素内容清空
+					$("#touclick-list").empty();
+
+					if (data.randCode != "" && data.randCode != null) {
+						console.log("getPassCodeNewSuccess.进入if--->");
+						$("#randCode").val(data.randCode);
+						$("#codediv").hide();
+					} else {
+						$("#randCode").val("");
+						$("#codediv").show();
+					}
+				}
+			}
+
+			// 验证码检测成功
+			function checkForLoginSuccess(data) {
+				dataItem = data.result;
+				if (dataItem.data.result == 1) {
+					ajax_login({
+						// Janine:之前的password可能是关键字，所以改成pwd
+						username: username,
+						pwd: pwd
+					});
+				}
+			}
+
+			/**
+			 * Janine:登录成功后,存储登录时填写的用户名,不用存储密码(如果存储密码需要进行加密处理,否则安全性会差)
+			 * @param {Object} data
+			 */
+			function loginSuccess(data) {
+				dataItem = data.result;
+				//  进行正确判断
+				if (dataItem.data.status == true) {
+					console.log("Janine:loginSuccess.进入--->");
+					// Janine:登录成功后,没有出现“登录成功”的字样？
+					mui.toast("登录成功");
+					// 登录成功后,存储返回的用户信息
+					localStorage.setItem('account',dataItem.data.username);
+					console.log("Janine:loginSuccess.account存储成功--->" + localStorage.getItem('account'));
+					
+					mui.back();  // Janine:回到上一界面
+					
+//					console.log("Janine:执行到此处没？")
+//					loginWebview.hide(); //先隐藏再关闭,避免出现关闭动画
+//					console.log("Janine:执行到此处没？？")
+//          		loginWebview.close();
+//          		console.log("Janine:执行到此处没？？？")
+    				
+				} else {
+					// Janine:登录失败,需要刷新验证码
+					mui.toast('登录失败');
+					ajax_getPassCodeNew({});
+				}
+			}
+		</script>
+	</body>
+
+</html>

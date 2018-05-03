@@ -1,0 +1,327 @@
+<!doctype html>
+<html>
+
+	<head>
+		<meta charset="UTF-8">
+		<title></title>
+		<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+		<link href="../css/mui.min.css" rel="stylesheet" />
+	</head>
+
+	<body>
+		<header class="mui-bar mui-bar-nav">
+		    <a class="mui-action-back mui-icon mui-icon-left-nav mui-pull-left"></a>
+		    <h1 class="mui-title">中转站查询详情</h1>
+		</header>
+		<div class="mui-content">
+			<div id="fromTstds_data" class="mui-table" style="font-size: 14px;margin-bottom: 2%;margin-top: 2%;;">
+				<div class="mui-table-cell mui-col-xs-2 " >
+					<div id="fromTstds_from_station" style="font-size: 20px;" > </div>
+				</div>
+			    <div  class="mui-table-cell mui-col-xs-2 ">
+					起点站-->
+				</div>
+				 <div class="mui-table-cell mui-col-xs-2 ">
+					<div id="fromTstds_to_station" style="font-size: 20px;margin-left: -20%;"> </div>
+				</div>
+				<div  class="mui-table-cell mui-col-xs-2 ">
+					<div style="margin-left: -40%;">中转站查询</div>
+				</div>
+		    </div>
+		    <ul class="mui-table-view" id="fromTstds_list">
+		        <!--<li class="mui-table-view-cell">
+		            <div class="mui-table">
+						<div class="mui-table-cell mui-col-xs-2 ">
+							<div>K1264</div>
+							<p>&nbsp;</p>
+							<p>软卧 无</p>
+						</div>
+						<div class="mui-table-cell mui-col-xs-2 " >
+							<div>合肥</div>
+							<div>石家庄</div>
+							<p>硬卧 无</p>
+						</div>
+						<div class="mui-table-cell mui-col-xs-2">
+							<div style="margin-left: 12%;">18:02</div>
+							<p style="margin-left: 12%;">06:58</p>
+							<p style="margin-left: 12%;">硬座 104</p>
+						</div>
+						<div class="mui-table-cell mui-col-xs-2">
+							<div style="margin-left: 12%;">12:56</div>
+							<p style="margin-left: 12%;">次日到达</p>
+							<p style="margin-left: 12%;">无座 104</p>
+						</div>
+						<div class="mui-table-cell mui-col-xs-2">
+							<div>&nbsp;</div>
+							<p></p>
+							<p style="margin-top:25%; margin-left: 12%;" >无座 104</p>
+						</div>	
+				    </div>  
+		        </li>-->
+		    </ul>
+		</div>
+		<div class="mui-content" style="margin-top: -10%;">
+			<div class="mui-table" style="font-size: 14px;margin-bottom: 2%;margin-top: 2%;;">
+				<div class="mui-table-cell mui-col-xs-2 " >
+					<div id="toTstds_from_station" style="font-size: 20px;"> </div>
+				</div>
+			    <div  class="mui-table-cell mui-col-xs-2 ">
+					中转站-->
+				</div>
+				 <div class="mui-table-cell mui-col-xs-2 ">
+					<div id="toTstds_to_station" style="font-size: 20px;margin-left: -20%;"></div>
+				</div>
+				<div  class="mui-table-cell mui-col-xs-2 ">
+					<div style="margin-left: -40%;">目的站查询</div>
+				</div>
+		    </div>
+		    <ul class="mui-table-view" id="toTstds_list">
+		        <!--<li class="mui-table-view-cell">
+		               
+		        </li> -->
+		    </ul>
+		</div>
+		
+		<script src="../js/mui.min.js"></script>
+		<script type="text/javascript">
+			mui.init({
+				beforeback: function(){
+					// 获得列表界面的webview
+					var list  = plus.webview.getWebviewById('template-main.html');   
+					// 触发前往页面的自定义事件（例：AddNew）,从而进行数据刷新
+					mui.fire(list ,'refresh',{
+						address_id:"template-sub.html",
+						title:"中转站查询",
+					});
+					// 返回true，继续页面关闭逻辑
+					return true;
+				},
+			});
+			var data;
+			
+			var fromTstds_list;
+			var fromTstds_list;
+			
+//			var countArray= new Array();
+			var countArray=[{name:"",type:""}];
+
+			var numbe_r;
+			mui.plusReady(function(){
+				var self = plus.webview.currentWebview(); //获取当前页面
+				var fromTstds_from_station=document.getElementById("fromTstds_from_station");
+				var fromTstds_to_station=document.getElementById("fromTstds_to_station");
+				var toTstds_from_station=document.getElementById("toTstds_from_station");
+				var toTstds_to_station=document.getElementById("toTstds_to_station");
+				
+				fromTstds_list=document.getElementById("fromTstds_list");
+				toTstds_list=document.getElementById("toTstds_list");
+				
+				data=self.data;
+				console.log(self.end_station_name);
+				fromTstds_from_station.innerText="1 "+self.start_station_name;
+				fromTstds_to_station.innerText=self.transfer;
+				toTstds_from_station.innerText="2 "+self.transfer;
+				toTstds_to_station.innerText=self.end_station_name;
+				
+				set_from_to_Tstds(data.data.fromTstds,1); //填充起始站到中转站
+				console.log(data.data.toTstds);
+				set_from_to_Tstds(data.data.toTstds,2); //填充起始站到中转站
+				
+			});
+			function set_from_to_Tstds(data,num){
+				var length=data.length;
+				console.log(length);
+				console.log(num);
+				var list='';
+				for(var i=0;i<length;i++){
+					var change_day;
+					initData();
+					if(data[i].day_difference==1){
+						change_day="次日到达";
+					}else if(data[i].day_difference==0){
+						change_day="当日到达";
+					}else if(data[i].day_difference==2){
+						change_day="第三日到达";
+					}
+					console.log(JSON.stringify(data[i]));
+					dataMation(data[i]);
+					console.log(i);
+					list = list+  '<li class="mui-table-view-cell">'+
+						            '<div class="mui-table">'+
+										'<div class="mui-table-cell mui-col-xs-2 ">'+
+											'<div>'+data[i].station_train_code+'</div>'+
+											'<p >'+' '+'</p>'+
+											'<p style="margin-top:23%;margin-right:-15%">'+countArray[0].name+countArray[0].type+'</p>'+
+										'</div>'+
+										'<div class="mui-table-cell mui-col-xs-2 ">'+
+											'<div style="margin-left: 20%;margin-right:-15%">'+data[i].from_station_name+'</div>'+
+											'<div style="margin-left: 20%;margin-right:-15%">'+data[i].to_station_name+'</div>'+
+											'<p style="margin-left: 20%;margin-right:-15%">'+countArray[1].name+countArray[1].type+'</p>'+
+										'</div>'+
+										'<div class="mui-table-cell mui-col-xs-2">'+
+											'<div style="margin-left: 30%;margin-right:-25%">'+data[i].start_time+'</div>'+
+											'<p style="margin-left: 30%;margin-right:-15%">'+data[i].arrive_time+'</p>'+
+											'<p style="margin-left: 30%;margin-right:-25%">'+countArray[2].name+countArray[2].type+'</p>'+
+										'</div>'+
+										'<div class="mui-table-cell mui-col-xs-2">'+
+											'<div style="margin-left: 30%;margin-right:-15%">'+data[i].lishi+'</div>'+
+											'<p style="margin-left: 30%;margin-right:-15%">'+change_day+'</p>'+
+											'<p style="margin-left: 30%;margin-right:-30%">'+countArray[3].name+countArray[3].type+'</p>'+
+										'</div>'+
+								    '</div> ';
+					if(numbe_r>4){
+						list=list+'<div class="mui-table">'+
+										'<div class="mui-table-cell mui-col-xs-2 ">'+
+											'<p style="margin-right:-15%">'+countArray[4].name+countArray[4].type+'</p>'+
+										'</div>'+
+										'<div class="mui-table-cell mui-col-xs-2 ">'+
+											'<p style="margin-left: 20%;margin-right:-15%">'+countArray[5].name+countArray[5].type+'</p>'+
+										'</div>'+
+										'<div class="mui-table-cell mui-col-xs-2">'+
+											'<p style="margin-left: 30%;margin-right:-25%">'+countArray[6].name+countArray[6].type+'</p>'+
+										'</div>'+
+										'<div class="mui-table-cell mui-col-xs-2">'+
+											'<p style="margin-left: 30%;margin-right:-30%">'+countArray[7].name+countArray[7].type+'</p>'+
+										'</div>'+
+									'</div>';
+					}
+					
+					list=list+'</li>';
+				}
+				if(num==1){
+					fromTstds_list.innerHTML=list;
+				}else if(num==2){
+					toTstds_list.innerHTML=list;
+				}
+			}
+				
+			function initData(){
+				console.log("进入初始化");
+				for(var i=0;i<11;i++){
+					var obj={}; // obj{name,type}
+					obj.name=" ";
+					obj.type=" ";
+					countArray.push(obj);
+				}
+				
+			}
+		
+		    function dataMation(data){
+		    	console.log("进入坐位初始化");
+             	var j=0;
+             	if(data.swz_num!="--"){      	  
+             	  	countArray[j].name="商务座:";
+             	  	countArray[j].type=data.swz_num;
+             	  	j++;
+             	}if(data.tz_num!="--"){
+             	  	countArray[j].name="特等座:";
+             	  	countArray[j].type=data.tz_num;
+             	  	
+             	  	j++;
+             	}if(data.zy_num!="--"){
+             	  	countArray[j].name="一等座:";
+             	  	countArray[j].type=data.zy_num;
+             	  	j++;
+             	}if(data.ze_num!="--"){
+             	  	countArray[j].name="二等座:";
+             	  	countArray[j].type=data.ze_num;
+             	  	j++;
+             	}if(data.gr_num!="--"){
+             	  	countArray[j].name="高级软卧:";
+             	  	countArray[j].type=data.gr_num;
+             	  	j++;
+             	}if(data.rw_num!="--"){
+             	  	countArray[j].name="软卧:";
+             	  	countArray[j].type=data.rw_num;
+             	  	j++;
+             	}if(data.yw_num!="--"){
+             	  	countArray[j].name="硬卧:";
+             	  	countArray[j].type=data.yw_num;
+             	  	j++;
+             	}if(data.rz_num!="--"){
+             	  	countArray[j].name="软座:";
+             	  	countArray[j].type=data.rz_num;
+                    j++;
+                }if(data.yz_num!="--"){
+             	  	countArray[j].name="硬座:";
+             	  	countArray[j].type=data.yz_num;
+             	  	j++;
+             	}
+                if(data.wz_num!="--"){
+             		console.log(j);          	  	
+             	  	countArray[j].name ="无座:";
+             	  	countArray[j].type=data.wz_num;
+             	  	j++;
+             	}if(data.qt_num!="--"){
+             	  	countArray[j].name="其他:";
+             	  	countArray[j].type=data.qt_num;
+             	  	j++;
+             	} 
+             	numbe_r=j;
+             	if(j<=4){
+             		if(j==3){
+	             	  	countArray[3].name=" ";
+	             	  	countArray[3].type=" ";
+	             	  	countArray.length=j+1;
+	             	}else if(j==2){
+	             	  	countArray[3].name=" ";
+	             	  	countArray[3].type=" ";
+	             	  	countArray[2].name=" ";
+	             	  	countArray[2].type=" ";
+	             	  	countArray.length=j+2;
+	             	}else if(j==1){
+	             	  	countArray[1].name=" ";
+	             	  	countArray[1].type=" ";
+	             	  	countArray[2].name=" ";
+	             	  	countArray[2].type=" ";
+	             	  	countArray[3].name=" ";
+	             	  	countArray[3].type=" ";
+	             	  	countArray.length=j+3;	
+	             	}else{
+	             		countArray.length=j;
+	             	}
+             	}
+             	
+             	if(j>4&&j<=8){
+             	  	if(j==7){
+	             	  	countArray[7].name=" ";
+	             	  	countArray[7].type=" ";
+	             	  	countArray.length=j+1;
+	             	}else if(j==6){
+	             	  	countArray[7].name=" ";
+	             	  	countArray[7].type=" ";
+	             	  	countArray[6].name=" ";
+	             	  	countArray[6].type=" ";
+	             	  	countArray.length=j+2;
+	             	}else if(j==5){
+	             	  	countArray[7].name=" ";
+	             	  	countArray[7].type=" ";
+	             	  	countArray[6].name=" ";
+	             	  	countArray[6].type=" ";
+	             	  	countArray[5].name=" ";
+	             	  	countArray[5].type=" ";
+	             	  	countArray.length=j+3;	
+	             	}else{
+	             		countArray.length=j;
+	             	}
+             	}
+             	console.log(countArray.length);
+             	if(data.controlled_train_message!="正常车次，不受控"){
+             		console.log(data.controlled_train_message);
+             		initData();
+             		countArray[0].name=data.controlled_train_message;
+	             	countArray[0].type=" ";
+	             	countArray[1].name=" ";
+	             	countArray[1].type=" ";
+	             	countArray[2].name=" ";
+	             	countArray[2].type=" ";
+	             	countArray[3].name=" ";
+	             	countArray[3].type=" ";
+	             	countArray.length=4;
+             	}
+             	
+			}
+		</script>
+	</body>
+
+</html>

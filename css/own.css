@@ -1,0 +1,59 @@
+
+.own-left-nav-color {
+	color: gray;
+}
+
+.own-html-css{
+	border-bottom: 1px solid #D3D3D3; 
+	width: 83%;
+	
+}
+
+.own-main-color {
+	color: #3889d8;
+}
+
+.own-gray-color {
+	background-color: #EBEBF1;
+}
+
+.own-black-color {
+	color: black;
+}
+.own-text-through {
+	text-decoration: line-through;
+}
+
+.own-main-background-color {
+	background-color: #3889d8;
+}
+
+.own-header-hidden {
+	display: none!important;
+}
+
+.own-content-padding {
+	padding-top: 0 !important;
+}
+
+.own-btn-green {
+	color: #fff;
+	border: 1px solid #3889d8;
+	background-color: #3889d8;
+}
+
+.own-btn-green.mui-active:enabled,
+.own-btn-green:enabled:active {
+	color: #fff;
+	border: 1px solid #41dfa9;
+	background-color: #41dfa9;
+}
+
+.own-font-size {
+	font-size: 1em;
+}
+
+.own-scroll-height{
+	height: 50%;
+	top:50%;
+}

@@ -1,0 +1,211 @@
+<!doctype html>
+<html>
+
+	<head>
+		<meta charset="UTF-8">
+		<title></title>
+		<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+		<link href="../../css/mui.min.css" rel="stylesheet" />
+	</head>
+
+	<body>
+		<header class="mui-bar mui-bar-nav">
+		    <a class="mui-action-back mui-icon mui-icon-left-nav mui-pull-left"></a>
+		    <h1 class="mui-title">未出行订单</h1>
+		</header>
+		<div class="mui-content">
+		    <div class="mui-table" style="font-size: 16px; margin-top: 8px; margin-bottom: 4px;">
+		    	<div id="Query_result"  class="mui-table-cell mui-col-xs-2 ">
+					<!--查询结果(4)-->
+				</div>
+		    </div>
+		    <ul id="queryList" class="mui-table-view">
+		    	<!--
+                	
+                	描述：去掉了“总张数”,只显示“订单号”、“乘车人”和“车次信息”
+                -->
+		    	<!--//li为循环内容-->
+		        <!--<li class="mui-table-view-cell"> 
+		            <a class="mui-navigate">   
+		               <div class="mui-table" style="font-size: 14px;">
+							<div class="mui-table-cell mui-col-xs-2 ">
+								订 &nbsp;单 &nbsp;号：
+							</div>
+							<div class="mui-table-cell mui-col-xs-2 mui-text-left ">
+								<p  style="margin-left: -30%;color: darkcyan;">E367295871</p>
+							</div>
+							<div class="mui-table-cell mui-col-xs-2">
+								张三
+							</div>
+						</div>  
+						<div class="mui-table" style="font-size: 14px; margin-top:8px ;">
+							<div class="mui-table-cell mui-col-xs-2 ">
+								车次信息：
+							</div>
+							<div class="mui-table-cell mui-col-xs-2 mui-text-left ">
+								<p style="margin-left: -60%;color: darkcyan;">7月31日 08:52 合肥-肥东</p>
+							</div>
+						</div> 
+		            </a>
+		        </li>-->
+		    </ul>
+		    <span id='progressbar' class="mui-spinner" style="position: absolute;left: 45%;top:250px;"></span>
+		</div>
+		<script src="../../js/mui.min.js"></script>
+		<script type="text/javascript" src="../../js/ajax.js" ></script>
+		<script type="text/javascript">
+			mui.init();
+			
+			var selfWebView;                  // 获取当前页面
+			var start_time;                   // 起始时间
+			var end_time;                     // 结束时间
+			var sequeue_train_name;           // 订单号
+			var progressbar;
+			
+			var queryList;                    // 查询的列表
+			var dataItem;
+			var orderDBLists; 
+			var Query_result;
+		
+			mui.plusReady(function(){
+				
+				// Janine:从详细列表返回的
+				window.addEventListener('NoTravelOrdersDisplay',function(e){
+					console.log("Janine:刷新啦---->")
+					plus.webview.getWebviewById('NoTravelOrdersDisplay.html').reload();
+				});
+				
+				selfWebView = plus.webview.currentWebview();
+				queryList = document.getElementById('queryList');
+				Query_result = document.getElementById('Query_result');
+				progressbar = document.getElementById('progressbar');
+				
+				start_time = selfWebView.start_time;                   // 起始时间
+				end_time = selfWebView.end_time;                       // 结束时间
+				sequeue_train_name = selfWebView.sequeue_train_name;   // 订单号
+				queryType = selfWebView.queryType;                     // 订单号/车次/乘客姓名 
+				
+				console.log("接收未出行订单的值--->" 
+						+ "start_time:" + start_time 
+						+ ",end_time:" + end_time
+						+ ",sequeue_train_name:" + sequeue_train_name
+						+ ",queryType:" + queryType);
+					
+				// Janine:finishedOrder_G.do——未出行订单
+				ajax_finishedOrder_G({
+					start_time : start_time,                    // 起始时间
+					end_time : end_time,                        // 结束时间
+					sequeue_train_name : sequeue_train_name,    // 订单号
+					queryType : queryType,   
+					query_where : "G"
+				});
+				
+				// 添加列表项的点击事件
+				mui('#queryList').on('tap', 'li', function() {
+					alert("Janine:queryList.OrderDTODataList:" + typeof dataItem.data.OrderDTODataList[this.getAttribute('data-id')]);
+					
+					//打开订单页面
+					mui.openWindow({
+						url: 'NoTravelOrdersDetail.html',
+						id: 'NoTravelOrdersDetail.html',
+						extras:{
+							OrderDTODataList : dataItem.data.OrderDTODataList[this.getAttribute('data-id')],
+    					},
+					});
+					
+				});
+			});
+			
+			// 查询未出行订单成功
+			function unfinishedOrder_GSuccess(data){
+				console.log("unfinishedOrder_GSuccess.进入--->");
+				progressbar.style.display = 'none';
+				dataItem = data.result;
+				var finallist = ''; 
+				
+				if(dataItem.data.order_total_number == "" || dataItem.data.order_total_number == 0){
+                	Query_result.innerHTML = "查询结果(0)";
+                }else{
+                	Query_result.innerHTML = "查询结果(" + dataItem.data.order_total_number + ")";
+                }
+					/*
+					 * Janine:以订单号为循环——"sequence_no": "E559085145";
+					 * 之前是以OrderDTODataList下的tickets字段进行的循环;
+					 * 这样的话是个单层循环
+					 */
+				for(var i = 0; i < dataItem.data.OrderDTODataList.length; i++){
+					orderDBLists = dataItem.data.OrderDTODataList[i];
+						/**
+						 * 
+						 *
+						 * 
+						 * <li class="mui-table-view-cell"> 
+		            			<a class="mui-navigate">   
+		               				<div class="mui-table" style="font-size: 14px;">
+										<div class="mui-table-cell mui-col-xs-2 ">
+											订 &nbsp;单 &nbsp;号：
+										</div>
+										<div class="mui-table-cell mui-col-xs-2 mui-text-left ">
+											<p  style="margin-left: -40%;color: darkcyan;">E367295871</p>
+										</div>
+										<div class="mui-table-cell mui-col-xs-2 mui-text-left ">
+											张三
+										</div>
+									</div>  
+									<div class="mui-table" style="font-size: 14px; margin-top:8px ;">
+										<div class="mui-table-cell mui-col-xs-2 ">
+											车次信息：
+										</div>
+										<div class="mui-table-cell mui-col-xs-2 mui-text-left ">
+											<p style="margin-left: -60%;color: darkcyan;">7月31日 08:52 合肥-肥东</p>
+										</div>
+									</div> 
+		            			</a>
+		        			</li>
+						 * 
+						 * 
+						 * 
+						 * 
+						 */
+						
+					 	finallist = finallist + '<li class="mui-table-view-cell" data-id="' + i + '" >'
+					 								+ '<a class="mui-navigate">'
+					 									+ '<div class="mui-table" style="font-size: 14px;">'
+					 										+ '<div class="mui-table-cell mui-col-xs-2">'
+																+ "订" + '&nbsp;' + "单" + '&nbsp;' + "号" + '&nbsp;' + ":" + '&nbsp;&nbsp;' 
+															+ '</div>'
+															+ '<div class="mui-table-cell mui-col-xs-2">'
+																+ '<p style="margin-left: -20%;color: darkcyan;">'
+																	+ orderDBLists.sequence_no
+																+ '</p>'
+															+ '</div>'
+															+ '<div class="mui-table-cell mui-col-xs-5">'
+															    + "乘" + '&nbsp;' + "车" + '&nbsp;' + "人" + '&nbsp;' + ":" + '&nbsp;&nbsp;'
+																+ orderDBLists.array_passser_name_page
+															+ '</div>'
+														+ '</div>'
+  														+ '<div class="mui-table" style="font-size: 14px; margin-top:8px;">'
+  															+ '<div class="mui-table-cell mui-col-xs-2 ">'
+																+ "车次信息"  + '&nbsp;' + ":" + '&nbsp;&nbsp;' 
+															+ '</div>'
+															+ '<div class="mui-table-cell mui-col-xs-2 mui-text-left">'
+																+ '<p style="margin-left:-60%;color:darkcyan;">'
+																	+ orderDBLists.start_train_date_page + '&nbsp;&nbsp;'
+																	+ orderDBLists.from_station_name_page + '&nbsp;&nbsp;'
+																	+ "-" 
+																	+ orderDBLists.to_station_name_page + '&nbsp;&nbsp;'
+																+ '</p>'
+															+ '</div>'
+														+ '</div>'
+													+ '</a>'
+												+ '</li>'
+				}
+				
+				queryList.innerHTML = finallist;
+				
+			}
+			
+		</script>
+	</body>
+
+</html>

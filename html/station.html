@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html>
+
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+		<title></title>
+		<script src="../js/mui.min.js"></script>
+		<link href="../css/mui.min.css" rel="stylesheet" />
+		<link href="../css/mui.indexedlist.css" rel="stylesheet" />
+		<style>
+			html,
+			body {
+				height: 100%;
+				overflow: hidden;
+			}
+			
+			.mui-bar {
+				-webkit-box-shadow: none;
+				box-shadow: none;
+			}
+		</style>
+		<script src="../js/mui.min.js"></script>
+		<script src="../js/mui.indexedlist.js"></script>
+		<script type="text/javascript" charset="UTF-8">
+			mui.init({
+				// 预加载main.html页面
+//				preloadPages:[{
+//  				url: '../main.html',
+//					id: 'main',           
+//				}],
+//				
+			});
+			var self;
+			var title;
+			var address;
+//			var mainTicketsPage = null;
+			var dataItem;
+			mui.ready(function() {
+				console.log("申请车站数据------------------->");
+				var header = document.querySelector('header.mui-bar');
+				var list = document.getElementById('list');
+				//calc hieght
+//				list.style.height = (document.body.offsetHeight - header.offsetHeight) + 'px';
+				list.style.height=(document.body.offsetHeight-45) + 'px';
+				
+				//create
+				window.indexedList = new mui.IndexedList(list);
+				var progressbar = document.getElementById('progressbar');        // Janine修改:定义进度条并赋值
+				//得到数据库中的数据
+				var stationList = document.getElementById("stationList");
+				var finalListA = '';
+				var finalListB = '';
+				var finalListC = '';
+				var finalListD = '';
+				var finalListE = '';
+				var finalListF = '';
+				var finalListG = '';
+				var finalListH = '';
+				var finalListI = '';
+				var finalListJ = '';
+				var finalListK = '';
+				var finalListL = '';
+				var finalListM = '';
+				var finalListN = '';
+				var finalListO = '';
+				var finalListP = '';
+				var finalListQ = '';
+				var finalListR = '';
+				var finalListS = '';
+				var finalListT = '';
+				var finalListU = '';
+				var finalListV = '';
+				var finalListW = '';
+				var finalListX = '';
+				var finalListY = '';
+				var finalListZ = '';
+				var finalList = '';
+				console.log("即将进入ajax申请车站数据------------------->");
+				mui.ajax('http://117.136.45.150:8080/trainticket/StationQueryServlet', {
+						data: {
+							//			requestType: StationQueryRequest //请求类型
+						},
+						dataType: 'json',
+						type: 'POST',
+						timeout: 5000,
+						success: function(data) {
+							
+							progressbar.style.display = 'none';   //Janine修改:查询成功后，因此进度条
+							
+							console.log("进入ajax申请车站数据------------------->"+JSON.stringify(data));
+							dataItem = data;
+							if (data.result == 1) {
+								//Json数组
+								console.log(data.content.length);
+								for (i = data.content.length - 1; i >= 0; i--) {
+									if (data.content[i].station_jianpin.substr(0, 1) == 'a') {
+										finalListA += '<li data-id="'+i+'" data-value="' + data.content[i].station_code + '" data-tags="' + data.content[i].station_fullName + '" class="mui-table-view-cell mui-indexed-list-item">' + data.content[i].station_name + '</li>';
+									} else if (data.content[i].station_jianpin.substr(0, 1) == 'b') {
+										finalListB += '<li data-id="'+i+'" data-value="' + data.content[i].station_code + '" data-tags="' + data.content[i].station_fullName + '" class="mui-table-view-cell mui-indexed-list-item">' + data.content[i].station_name + '</li>';
+									}else if (data.content[i].station_jianpin.substr(0, 1) == 'c') {
+										finalListC += '<li data-id="'+i+'" data-value="' + data.content[i].station_code + '" data-tags="' + data.content[i].station_fullName + '" class="mui-table-view-cell mui-indexed-list-item">' + data.content[i].station_name + '</li>';
+									}else if (data.content[i].station_jianpin.substr(0, 1) == 'd') {
+										finalListD += '<li data-id="'+i+'" data-value="' + data.content[i].station_code + '" data-tags="' + data.content[i].station_fullName + '" class="mui-table-view-cell mui-indexed-list-item">' + data.content[i].station_name + '</li>';
+									}else if (data.content[i].station_jianpin.substr(0, 1) == 'e') {
+										finalListE += '<li data-id="'+i+'" data-value="' + data.content[i].station_code + '" data-tags="' + data.content[i].station_fullName + '" class="mui-table-view-cell mui-indexed-list-item">' + data.content[i].station_name + '</li>';
+									}else if (data.content[i].station_jianpin.substr(0, 1) == 'f') {
+										finalListF += '<li data-id="'+i+'" data-value="' + data.content[i].station_code + '" data-tags="' + data.content[i].station_fullName + '" class="mui-table-view-cell mui-indexed-list-item">' + data.content[i].station_name + '</li>';
+									}else if (data.content[i].station_jianpin.substr(0, 1) == 'g') {
+										finalListG += '<li data-id="'+i+'" data-value="' + data.content[i].station_code + '" data-tags="' + data.content[i].station_fullName + '" class="mui-table-view-cell mui-indexed-list-item">' + data.content[i].station_name + '</li>';
+									}else if (data.content[i].station_jianpin.substr(0, 1) == 'h') {
+										finalListH += '<li data-id="'+i+'" data-value="' + data.content[i].station_code + '" data-tags="' + data.content[i].station_fullName + '" class="mui-table-view-cell mui-indexed-list-item">' + data.content[i].station_name + '</li>';
+									}else if (data.content[i].station_jianpin.substr(0, 1) == 'i') {
+										finalListI += '<li data-id="'+i+'" data-value="' + data.content[i].station_code + '" data-tags="' + data.content[i].station_fullName + '" class="mui-table-view-cell mui-indexed-list-item">' + data.content[i].station_name + '</li>';
+									}else if (data.content[i].station_jianpin.substr(0, 1) == 'j') {
+										finalListJ += '<li data-id="'+i+'" data-value="' + data.content[i].station_code + '" data-tags="' + data.content[i].station_fullName + '" class="mui-table-view-cell mui-indexed-list-item">' + data.content[i].station_name + '</li>';
+									}else if (data.content[i].station_jianpin.substr(0, 1) == 'k') {
+										finalListK += '<li data-id="'+i+'" data-value="' + data.content[i].station_code + '" data-tags="' + data.content[i].station_fullName + '" class="mui-table-view-cell mui-indexed-list-item">' + data.content[i].station_name + '</li>';
+									}else if (data.content[i].station_jianpin.substr(0, 1) == 'l') {
+										finalListL += '<li data-id="'+i+'" data-value="' + data.content[i].station_code + '" data-tags="' + data.content[i].station_fullName + '" class="mui-table-view-cell mui-indexed-list-item">' + data.content[i].station_name + '</li>';
+									}else if (data.content[i].station_jianpin.substr(0, 1) == 'm') {
+										finalListM += '<li data-id="'+i+'" data-value="' + data.content[i].station_code + '" data-tags="' + data.content[i].station_fullName + '" class="mui-table-view-cell mui-indexed-list-item">' + data.content[i].station_name + '</li>';
+									}else if (data.content[i].station_jianpin.substr(0, 1) == 'n') {
+										finalListN += '<li data-id="'+i+'" data-value="' + data.content[i].station_code + '" data-tags="' + data.content[i].station_fullName + '" class="mui-table-view-cell mui-indexed-list-item">' + data.content[i].station_name + '</li>';
+									}else if (data.content[i].station_jianpin.substr(0, 1) == 'o') {
+										finalListO += '<li data-id="'+i+'" data-value="' + data.content[i].station_code + '" data-tags="' + data.content[i].station_fullName + '" class="mui-table-view-cell mui-indexed-list-item">' + data.content[i].station_name + '</li>';
+									}else if (data.content[i].station_jianpin.substr(0, 1) == 'p') {
+										finalListP += '<li data-id="'+i+'" data-value="' + data.content[i].station_code + '" data-tags="' + data.content[i].station_fullName + '" class="mui-table-view-cell mui-indexed-list-item">' + data.content[i].station_name + '</li>';
+									}else if (data.content[i].station_jianpin.substr(0, 1) == 'q') {
+										finalListQ += '<li data-id="'+i+'" data-value="' + data.content[i].station_code + '" data-tags="' + data.content[i].station_fullName + '" class="mui-table-view-cell mui-indexed-list-item">' + data.content[i].station_name + '</li>';
+									}else if (data.content[i].station_jianpin.substr(0, 1) == 'r') {
+										finalListR += '<li data-id="'+i+'" data-value="' + data.content[i].station_code + '" data-tags="' + data.content[i].station_fullName + '" class="mui-table-view-cell mui-indexed-list-item">' + data.content[i].station_name + '</li>';
+									}else if (data.content[i].station_jianpin.substr(0, 1) == 's') {
+										finalListS += '<li data-id="'+i+'" data-value="' + data.content[i].station_code + '" data-tags="' + data.content[i].station_fullName + '" class="mui-table-view-cell mui-indexed-list-item">' + data.content[i].station_name + '</li>';
+									}else if (data.content[i].station_jianpin.substr(0, 1) == 't') {
+										finalListT += '<li data-id="'+i+'" data-value="' + data.content[i].station_code + '" data-tags="' + data.content[i].station_fullName + '" class="mui-table-view-cell mui-indexed-list-item">' + data.content[i].station_name + '</li>';
+									}else if (data.content[i].station_jianpin.substr(0, 1) == 'u') {
+										finalListU += '<li data-id="'+i+'" data-value="' + data.content[i].station_code + '" data-tags="' + data.content[i].station_fullName + '" class="mui-table-view-cell mui-indexed-list-item">' + data.content[i].station_name + '</li>';
+									}else if (data.content[i].station_jianpin.substr(0, 1) == 'v') {
+										finalListV += '<li data-id="'+i+'" data-value="' + data.content[i].station_code + '" data-tags="' + data.content[i].station_fullName + '" class="mui-table-view-cell mui-indexed-list-item">' + data.content[i].station_name + '</li>';
+									}else if (data.content[i].station_jianpin.substr(0, 1) == 'w') {
+										finalListW += '<li data-id="'+i+'" data-value="' + data.content[i].station_code + '" data-tags="' + data.content[i].station_fullName + '" class="mui-table-view-cell mui-indexed-list-item">' + data.content[i].station_name + '</li>';
+									}else if (data.content[i].station_jianpin.substr(0, 1) == 'x') {
+										finalListX += '<li data-id="'+i+'" data-value="' + data.content[i].station_code + '" data-tags="' + data.content[i].station_fullName + '" class="mui-table-view-cell mui-indexed-list-item">' + data.content[i].station_name + '</li>';
+									}else if (data.content[i].station_jianpin.substr(0, 1) == 'y') {
+										finalListY += '<li data-id="'+i+'" data-value="' + data.content[i].station_code + '" data-tags="' + data.content[i].station_fullName + '" class="mui-table-view-cell mui-indexed-list-item">' + data.content[i].station_name + '</li>';
+									}else if (data.content[i].station_jianpin.substr(0, 1) == 'z') {
+										finalListZ += '<li data-id="'+i+'" data-value="' + data.content[i].station_code + '" data-tags="' + data.content[i].station_fullName + '" class="mui-table-view-cell mui-indexed-list-item">' + data.content[i].station_name + '</li>';
+									}
+								}
+								finalList ='<li data-group="A" class="mui-table-view-divider mui-indexed-list-group">A</li>' + finalListA + '<li data-group="B" class="mui-table-view-divider mui-indexed-list-group">B</li>' + finalListB 
+								+ '<li data-group="C" class="mui-table-view-divider mui-indexed-list-group">C</li>' + finalListC
+								+ '<li data-group="D" class="mui-table-view-divider mui-indexed-list-group">D</li>' + finalListD +'<li data-group="E" class="mui-table-view-divider mui-indexed-list-group">E</li>' + finalListE
+								+ '<li data-group="F" class="mui-table-view-divider mui-indexed-list-group">F</li>' + finalListF +'<li data-group="G" class="mui-table-view-divider mui-indexed-list-group">G</li>' + finalListG
+								+ '<li data-group="H" class="mui-table-view-divider mui-indexed-list-group">H</li>' + finalListH +'<li data-group="J" class="mui-table-view-divider mui-indexed-list-group">J</li>' + finalListJ 
+								+ '<li data-group="K" class="mui-table-view-divider mui-indexed-list-group">K</li>' + finalListK +'<li data-group="L" class="mui-table-view-divider mui-indexed-list-group">L</li>' + finalListL 
+								+ '<li data-group="M" class="mui-table-view-divider mui-indexed-list-group">M</li>' + finalListM +'<li data-group="N" class="mui-table-view-divider mui-indexed-list-group">N</li>' + finalListN
+								+ '<li data-group="P" class="mui-table-view-divider mui-indexed-list-group">P</li>' + finalListP + '<li data-group="Q" class="mui-table-view-divider mui-indexed-list-group">Q</li>' + finalListQ
+								+ '<li data-group="R" class="mui-table-view-divider mui-indexed-list-group">R</li>' + finalListR + '<li data-group="S" class="mui-table-view-divider mui-indexed-list-group">S</li>' + finalListS
+								+ '<li data-group="T" class="mui-table-view-divider mui-indexed-list-group">T</li>' + finalListT + '<li data-group="W" class="mui-table-view-divider mui-indexed-list-group">W</li>' + finalListW
+								+ '<li data-group="X" class="mui-table-view-divider mui-indexed-list-group">X</li>' + finalListX + '<li data-group="Y" class="mui-table-view-divider mui-indexed-list-group">Y</li>' + finalListY
+								+ '<li data-group="Z" class="mui-table-view-divider mui-indexed-list-group">Z</li>' + finalListZ;
+								stationList.innerHTML = finalList;
+								//查询成功
+								console.log("查询成功"); //类似于Android中的Toast类	
+							}else {
+							//查询失败
+							plus.ui.toast(data.data);
+							}
+					},
+					error: function() {
+					}
+				})
+			});
+			
+			
+			
+			
+			mui.plusReady(function() {
+				
+				self=plus.webview.currentWebview();       // 获取当前页面
+				title=document.getElementById('title');   // 获取标题
+				title.innerHTML=self.station;             // 设置标题
+				address=self.address;     //获取传输数据的地址
+				
+				// 点击车站列表的Item事件
+				mui('#stationList').on('tap', 'li', function() {
+					console.log("dataItem.content[this.getAttribute('data-id')].station_name--->"+dataItem.content[this.getAttribute('data-id')].station_name);
+					console.log(address);
+					console.log(self.station);
+					
+				    var mainWebview = plus.webview.getWebviewById('HBuilder');
+				    //赵双----------------
+					if(address.indexOf("needtem.html")<=0) {
+						var webview = plus.webview.getWebviewById(address);
+						console.log(webview);
+						if(title.innerHTML=="出发站"){
+							mui.fire(webview,'fromtag',{
+	    					    station_name: dataItem.content[this.getAttribute('data-id')].station_name,      
+						    });
+						}else if(title.innerHTML=="目的站"){
+							mui.fire(webview,'totag',{
+	    					    station_name: dataItem.content[this.getAttribute('data-id')].station_name,      
+						    });
+						}  
+	                    mui.back();
+	                //赵双----------------
+				    }else {
+				    	//如果是needtem.html则直接打开
+						console.log("ppppppppp");
+						console.log(self.title);
+						mui.fire(mainWebview,'newWebView',{
+							id:address,
+							href:address,
+							aniShow:'slide-in-bottom',
+							title: self.title,
+							title_name: self.station,
+							station_name: dataItem.content[this.getAttribute('data-id')].station_name,
+						});
+				    }
+				});
+				
+			});
+			
+		</script>
+	</head>
+
+	<body>
+		<!--标题-->
+		<header class="mui-bar mui-bar-nav">
+			<a class="mui-action-back mui-icon mui-icon-left-nav mui-pull-left"></a>
+			<h1 id="title" class="mui-title"></h1>
+		</header>
+		<div class="mui-content">
+			<div id='list' class="mui-indexed-list">
+				<!--
+                	
+                	描述：添加了进度条组件
+                -->
+				<span id='progressbar' class="mui-spinner" style="position: absolute;left: 45%;top:250px;display: block;"></span>
+				<!--
+            
+            	描述：搜索框：input type="search" placeholder="中文/拼音/首字母"
+            -->
+				<div class="mui-indexed-list-search mui-input-row mui-search">
+					<input type="search" class="mui-input-clear mui-indexed-list-search-input" placeholder="中文/拼音/首字母">
+				</div>
+				<!--
+            
+            	描述：索引条上的26个字母
+            -->
+				<div class="mui-indexed-list-bar">
+					<a>A</a>
+					<a>B</a>
+					<a>C</a>
+					<a>D</a>
+					<a>E</a>
+					<a>F</a>
+					<a>G</a>
+					<a>H</a>
+					<a>I</a>
+					<a>J</a>
+					<a>K</a>
+					<a>L</a>
+					<a>M</a>
+					<a>N</a>
+					<a>O</a>
+					<a>P</a>
+					<a>Q</a>
+					<a>R</a>
+					<a>S</a>
+					<a>T</a>
+					<a>U</a>
+					<a>V</a>
+					<a>W</a>
+					<a>X</a>
+					<a>Y</a>
+					<a>Z</a>
+				</div>
+				<div class="mui-indexed-list-alert"></div>
+				<div class="mui-indexed-list-inner">
+					<div class="mui-indexed-list-empty-alert">没有数据</div>
+					<ul id="stationList" class="mui-table-view">
+					</ul>
+				</div>
+			</div>
+		</div>
+	</body>
+</html>

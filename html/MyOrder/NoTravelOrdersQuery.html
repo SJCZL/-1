@@ -1,0 +1,168 @@
+<!doctype html>
+<html>
+
+	<head>
+		<meta charset="UTF-8">
+		<title></title>
+		<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+		<link href="../../css/mui.min.css" rel="stylesheet" />
+		<style>
+			.mui-btn {
+				width: 100%;
+				height:50px;
+				font-size: 25px;
+			}
+		</style>
+	</head>
+
+	<body>
+		<header class="mui-bar mui-bar-nav">
+		    <a class="mui-action-back mui-icon mui-icon-left-nav mui-pull-left"></a>
+		    <h1 class="mui-title">未出行订单</h1>
+		</header>
+		<div class="mui-content">
+		    <div class="mui-segmented-control">
+		        <a id="queryType" class="mui-control-item mui-active" href="booking_time" >按订票日期查询</a>  
+		        <a class="mui-control-item" href="riding_time">按乘车日期查询</a>
+		    </div>
+		    <ul class="mui-table-view">
+		        <li class="mui-table-view-cell">
+		           <div class="mui-table">
+						<div class="mui-table-cell mui-col-xs-2">
+							<p style="font-size: 16px;">起始日期</p>
+						</div>
+						<div class="mui-table-cell mui-col-xs-2">
+							<input id="start_date" type='date'/>
+						</div>
+					</div>    
+		        </li>
+		        <li class="mui-table-view-cell">
+		            <div class="mui-table">
+						<div class="mui-table-cell mui-col-xs-2">
+							<p style="font-size: 16px;">结束日期</p>
+						</div>
+						<div class="mui-table-cell mui-col-xs-2">
+							<input id="end_date" type='date'/>
+						</div>
+					</div>        
+		        </li>
+		        <li class="mui-table-view-cell">
+		            <div class="mui-table">
+						<div class="mui-table-cell mui-col-xs-2 ">
+							<p style="font-size: 16px;">相关信息</p>
+						</div>
+						<div class="mui-table-cell mui-col-xs-2  ">					
+					        <input id="sequeue_train_name" placeholder="订单号/车次/乘客姓名"  style="border-style: none"/>
+						</div>
+					</div>      
+		        </li>
+		    </ul>
+		    <div class="mui-content-padded" align="center">
+		        <button id="pay" type="button" class="mui-btn mui-btn-blue">查询</button>
+	        </div>
+		</div>
+		<script src="../../js/mui.min.js"></script>
+		<script src="../../js/jquery-1.8.3.min.js"></script>
+		<script type="text/javascript">
+			mui.init();
+			
+			var payBtn;                                      // 查询按钮
+			var Tstart_time;                                 // 起始时间
+			var Tend_time;                                   // 结束时间
+			var Tsequeue_train_name;                         // 订单号
+			var queryType;                                   // 1、按订票日期查询，2、按乘车日期查询
+			var today;                                       // 今天的时间
+			
+			var start_time;                                  // 起始时间
+			var end_time;                                    // 结束时间
+			
+			var booking_time;                                // 按订单日期查询
+			var riding_time;                                 // 按乘车日期查询
+			
+			mui.plusReady(function(){
+				
+				payBtn = document.getElementById('pay');                                  // 获取查询按钮
+				Tsequeue_train_name = document.getElementById('sequeue_train_name');      // 订单号/车次/乘客姓名 
+				
+				var test = nowDate();
+				
+				// 赋值的方法
+				$("#start_date")[0].value = test;
+//				$("#start_date").val(test);
+				$("#end_date").val(test);
+				
+				console.log("Test.test.值--->"+ test);
+
+				// 查询未出行订单的按钮
+				payBtn.addEventListener('tap',function(){
+					console.log("查询未出行订单点击事件.进入--->");
+					
+					// 获取input中的值
+					start_time = $("#start_date").val();
+					end_time = $("#end_date").val();
+					sequeue_train_name = $("#sequeue_train_name").val();
+					
+					console.log("查询未出行订单传值--->" +start_time+",end_time:" + end_time 
+							+ ",sequeue_train_name:" + sequeue_train_name);
+					
+					if($("#queryType").attr("class") == "mui-control-item mui-active"){
+						// 点击进入未完成订单页面unfinishedOrder.html
+						mui.openWindow({
+							url : 'NoTravelOrdersDisplay.html',
+							id : 'NoTravelOrdersDisplay.html',
+							extras : {
+								start_time : start_time,
+								end_time : end_time,
+								sequeue_train_name : sequeue_train_name,
+								queryType : "1"
+							}
+						});
+						
+					}else{
+						// 点击进入未完成订单页面unfinishedOrder.html
+						mui.openWindow({
+							url : 'NoTravelOrdersDisplay.html',
+							id : 'NoTravelOrdersDisplay.html',
+							extras : {
+								start_time : start_time,
+								end_time : end_time,
+								sequeue_train_name : sequeue_train_name,
+								queryType : "2"
+							}
+						});
+					}
+				});
+				
+			});
+			
+			// 获取当前时间
+			function nowDate(){
+				
+				now = new Date();     // 当前日期
+				if((now.getMonth() + 1) < 10){
+					
+					if(now.getDate()<10){
+						today = now.getFullYear() + '-' +'0' + (now.getMonth() + 1) + '-' +'0' + now.getDate();// 当前日期
+					}else{
+						today = now.getFullYear() + '-' +'0' + (now.getMonth() + 1) + '-' + now.getDate();// 当前日期
+					}
+					
+				}else{
+					
+					if(now.getDate()<10){
+						today = now.getFullYear() + '-' + (now.getMonth() + 1) + '-' +'0' + now.getDate();// 当前日期
+					}else{
+						today = now.getFullYear() + '-' + (now.getMonth() + 1) + '-' + now.getDate();// 当前日期
+					}
+					
+				}
+				
+				console.log("today is day--->" + today);
+				
+				return today;
+			}
+			
+		</script>
+	</body>
+          
+</html>

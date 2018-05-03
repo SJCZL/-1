@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+		<title></title>
+		<link rel="stylesheet" href="../css/own.css" />
+		<link href="../css/mui.min.css" rel="stylesheet" />
+		<!--<link rel="stylesheet" href="../css/iconfont.css" />-->
+		
+	</head>
+
+	<body>
+		<header class="mui-bar mui-bar-nav">
+			<a id="back" class="mui-action-back mui-icon mui-icon-left-nav mui-pull-left"></a>
+			<h1 id="title" class="mui-title">车票列表</h1>
+		</header>
+		<div class="mui-content">
+			
+		</div>
+		<script src="../js/mui.min.js"></script>
+		<script type="text/javascript" src="../js/own.js" ></script>
+		<script type="text/javascript" charset="UTF-8">
+			mui.init({
+				swipeBack:true ,
+				gestureConfig: {
+					doubletap: true
+				},
+				subpages: [{
+					url: 'trainResultShow_sub.html', //下拉刷新内容页面地址
+					id: 'trainResultShow_sub.html', //内容页面标志
+					styles: {
+						top: '45px', //内容页面顶部位置,需根据实际页面布局计算，若使用标准mui导航，顶部默认为48px；
+						bottom: '0px',
+					}
+				}]
+			});
+			
+			mui.plusReady(function(){
+				
+				//Janine:从详细列表返回的
+				window.addEventListener('refresh',function(e){
+					console.log("Janine:刷新-----进入------->");
+					plus.webview.getWebviewById('trainResultShow_sub.html').reload();
+				});
+			});
+		</script>
+	</body>
+
+</html>

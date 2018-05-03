@@ -1,0 +1,340 @@
+<!doctype html>
+<html>
+
+	<head>
+		<meta charset="UTF-8">
+		<title></title>
+		<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+		<link href="../../css/mui.min.css" rel="stylesheet"/>
+		<style>
+			.mui-btn {
+				width: 100%;
+				height: 50px;
+				font-size: 25px;
+			}
+		</style>
+	</head>
+
+	<body>
+		<header class="mui-bar mui-bar-nav">
+			<a class="mui-action-back mui-icon mui-icon-left-nav mui-pull-left"></a>
+			<h1 class="mui-title">未完成订单</h1>
+		</header>
+		<div class="mui-content">
+			<div id="orderDBList">
+				<!--<ul class="mui-table-view" style="margin-top: 0px;">
+					<li class="mui-table-view-cell">
+						<div class="mui-table">
+							<div class="mui-table-cell mui-col-xs-4 mui-text-left ">
+								<p style="font-size: 14px;">订单号:E312653246</p>
+							</div>
+							<div class="mui-table-cell mui-col-xs-4 mui-text-right ">
+								<p style="font-size: 14px;">票数:1张</p>
+							</div>
+						</div>
+					</li>
+				</ul>-->
+				<!--<ul class="mui-table-view">
+					<li class="mui-table-view-cell">
+						<div class="mui-table">
+							<div class="mui-table-cell mui-col-xs-2 ">
+								<p id="start_time" style="font-size: 16px;">2016-7-18</p>
+							</div>
+							<div class="mui-table-cell mui-col-xs-2 mui-text-center ">
+								<p id="from_to_station " style="font-size: 14px;">肥东09:06合肥09:24</p>
+							</div>
+						</div>
+					</li>-->
+					<!--<li class="mui-table-view-cell">
+						<div class="mui-table">
+							<div class="mui-table-cell mui-col-xs-2 ">
+								<p id="station_train_code" style="font-size: 16px;">G7687</p>
+							</div>
+							<div class="mui-table-cell mui-col-xs-2 ">
+								<p id="seat_type_name " style="font-size: 14px;">二等座</p>
+							</div>
+							<div class="mui-table-cell mui-col-xs-2 ">
+								<p id="coach_name " style="font-size: 14px;">02车</p>
+							</div>
+							<div class="mui-table-cell mui-col-xs-2 ">
+								<p id="seat_name " style="font-size: 14px;">04A号</p>
+							</div>
+						</div>
+					</li>-->
+					<!--<li class="mui-table-view-cell">
+			        <div class="mui-table">
+						<div class="mui-table-cell mui-col-xs-1 mui-text-left">
+							<p id="passenger_name" style="font-size: 16px;">张三</p>
+						</div>
+						<div class="mui-table-cell mui-col-xs-3 ">
+							<p id="passenger_id_type_name "  style="font-size: 14px;">321569788952605000</p>
+						</div>
+						<div class="mui-table-cell mui-col-xs-2 mui-text-right ">
+							<p id="ticket_type_name "  style="font-size: 14px;" >成人票</p>
+						</div>
+						<div class="mui-table-cell mui-col-xs-2 mui-text-right ">
+							<p id="ticket_price "  style="font-size: 14px;" >14.50元</p>
+						</div>
+					</div>
+			    </li>-->
+			    <!--<li class="mui-table-view-cell">
+			        <div class="mui-table">
+						<div class="mui-table-cell mui-col-xs-2 mui-text-right">
+							<p  style="font-size: 16px;">车票状态：待支付</p>
+						</div>
+					</div>
+			    </li>
+			</ul>-->
+			</div>
+			<div class="mui-content-padded" align="center">
+				<button id="continue_pay" type="button" class="mui-btn mui-btn-blue">继续支付</button>
+			</div>
+			<div class="mui-content-padded" align="center">
+				<button id="cancel" type="button" class="mui-btn mui-button-row">取消订单</button>
+			</div>
+			<span id='progressbar' class="mui-spinner" style="position: absolute;left: 45%;top:250px;display: block;"></span>
+		</div>
+		<script src="../../js/mui.min.js"></script>
+		<script type="text/javascript" src="../../js/ajax.js"></script>
+		<script type="text/javascript">
+			mui.init();
+
+			var cancelBtn;                      // 取消订单按钮
+			var continuePayBtn;                 // 继续付款按钮 
+			var dataItem;                       // 接收data数据
+			var orderDBList;                    // 订单的列表
+			var orderDBLists;                   // 订单的数据
+			var progressbar;
+
+			mui.plusReady(function() {
+				ajax_unfinishedOrder({}); // 请求未完成订单
+				initView(); // 初始化控件
+			});
+
+			// 初始化订单界面
+			function initView() {
+
+				cancelBtn = document.getElementById('cancel');                  // 初始化取消按钮
+				continuePayBtn = document.getElementById('continue_pay');       // 初始化继续支付按钮
+				orderDBList = document.getElementById('orderDBList');           // 订单数据列表
+				progressbar = document.getElementById('progressbar');           // 进度条
+				continuePayBtn.style.display = 'none';
+				cancelBtn.style.display = 'none';
+				
+				// 点击取消
+				cancelBtn.addEventListener('tap',function(){
+					// 取消订单的接口
+					// Janine:未支付
+					if(dataItem.data.orderDBList[0].pay_flag == 'Y'){
+						ajax_cancelOrder({
+							sequence_no : dataItem.data.orderDBList[0].sequence_no,
+							cancel_flag : 'cancel_order',
+						});
+					}
+					// Janine:改签待支付
+					if(dataItem.data.orderDBList[0].pay_resign_flag == 'Y'){
+						ajax_cancelOrder({
+							sequence_no : dataItem.data.orderDBList[0].sequence_no,
+							cancel_flag : 'cancel_resign',
+						});
+					}
+				});
+				
+				// 继续支付按钮
+				continuePayBtn.addEventListener('tap',function(){
+					// Janine:先测购票后未完成的继续购票
+					if(dataItem.data.orderDBList[0].pay_flag == "Y"){
+						// 继续支付的接口
+						ajax_continuePay({
+							sequence_no : dataItem.data.orderDBList[0].sequence_no,
+							pay_flag : 'pay'
+						});
+					}else if(dataItem.data.orderDBList[0].pay_resign_flag == "Y"){
+						// 继续支付的接口
+						ajax_continuePay({
+							sequence_no : dataItem.data.orderDBList[0].sequence_no,
+							pay_flag : 'resign'
+						});
+					}
+					
+				});
+				
+			}
+
+			/**
+			 * 
+			 * Janine:订单时间:2016年7月18日	订单号:E312653246		总张数:1张
+			 * 查询未完成订单成功
+			 * 
+			 */
+			function unfinishedOrderSuccess(data) {
+				progressbar.style.display = 'none';
+				dataItem = data.result;
+				var finallist = ''; 
+				
+				for(var i = 0; i < dataItem.data.orderDBList.length; i++){
+					orderDBLists = dataItem.data.orderDBList[i];
+					
+					/**
+					 * <ul class="mui-table-view" style="margin-top: 0px;">
+					 *		<li class="mui-table-view-cell">
+					 *			<div class="mui-table">
+					 *				<div class="mui-table-cell mui-col-xs-4 mui-text-left ">
+					 *					<p style="font-size: 14px;">订单号:E312653246</p>
+					 *				</div>
+					 *				<div class="mui-table-cell mui-col-xs-4 mui-text-right ">
+					 *					<p style="font-size: 14px;">票数:1张</p>
+					 *				</div>
+					 *			</div>
+					 *		</li>
+					 *	</ul>
+					 */
+					
+					
+					finallist = finallist + '<ul class="mui-table-view" style="margin-top: 0px;"><li class="mui-table-view-cell"><div class="mui-table">'
+								+ '<div class="mui-table-cell mui-col-xs-4 "><p style="font-size: 14px;">'
+								+ "订单号" + '&nbsp;' + ":" + '&nbsp;&nbsp;' + orderDBLists.sequence_no
+								+ '</p></div><div class="mui-table-cell mui-col-xs-4 mui-text-right"><p style="font-size: 14px;">'
+								+ "总张数" + '&nbsp;' + ":" + '&nbsp;&nbsp;' + orderDBLists.tickets.length+"张"	
+								+ '</p></div></div></li></ul>';
+								
+					for(var j=0; j < orderDBLists.tickets.length; j++){
+						
+						finallist = finallist + '<ul class="mui-table-view"><li class="mui-table-view-cell"><div class="mui-table">'
+								+ '<div class="mui-table-cell mui-col-xs-2 "><p id="start_time" style="font-size: 16px;">'
+								+ "乘车时间" + '&nbsp;' + ":" + '&nbsp;&nbsp;' + orderDBLists.start_train_date_page.substr(0,11)
+								+ '</p></div><div class="mui-table-cell mui-col-xs-2 mui-text-center "><p id="from_to_station" style="font-size: 14px;">'
+								+ orderDBLists.tickets[j].stationTrainDTO.from_station_name + orderDBLists.start_time_page
+								+ "--->"
+								+ orderDBLists.tickets[j].stationTrainDTO.to_station_name + orderDBLists.arrive_time_page
+								+ '</p></div></div></li><li class="mui-table-view-cell"><div class="mui-table"><div class="mui-table-cell mui-col-xs-2 ">'
+								+ '<p id="station_train_code" style="font-size: 16px;">'
+								+ orderDBLists.tickets[j].stationTrainDTO.station_train_code
+								+ '</p></div><div class="mui-table-cell mui-col-xs-2 "><p id="seat_type_name " style="font-size: 14px;">'
+								+ orderDBLists.tickets[j].seat_type_name
+								+ '</p></div><div class="mui-table-cell mui-col-xs-2 "><p id="coach_name " style="font-size: 14px;">'
+								+ orderDBLists.tickets[j].coach_name + "车"
+								+ '</p></div><div class="mui-table-cell mui-col-xs-2 "><p id="seat_name " style="font-size: 14px;">'
+								+ orderDBLists.tickets[j].seat_name
+								+ '</p></div></div></li><li class="mui-table-view-cell"><div class="mui-table"><div class="mui-table-cell mui-col-xs-1 mui-text-left">'
+								+ '<p id="passenger_name" style="font-size: 16px;">' 
+								+ orderDBLists.tickets[j].passengerDTO.passenger_name
+								+ '</p></div><div class="mui-table-cell mui-col-xs-3"><p id="passenger_id_type_name" tyle="font-size: 14px;">'
+								+ orderDBLists.tickets[j].passengerDTO.passenger_id_no
+								+ '</p></div><div class="mui-table-cell mui-col-xs-1"><p id="ticket_type_name" style="font-size: 14px;">'
+								+ orderDBLists.tickets[j].ticket_type_name
+								+ '</p></div><div class="mui-table-cell mui-col-xs-1"><p id="ticket_price" style="font-size: 14px;">¥'
+								+ orderDBLists.tickets[j].str_ticket_price_page + "元"
+								+ '</p></div></div></li><li class="mui-table-view-cell"><div class="mui-table"><div class="mui-table-cell mui-col-xs-2"><p style="font-size: 16px;">'
+								+ "车票状态" + '&nbsp;' + ":" + '&nbsp;&nbsp;' + orderDBLists.tickets[j].ticket_status_name
+								+ '</p></div></div></li></ul>'
+					}
+				}
+				continuePayBtn.style.display='block';
+				cancelBtn.style.display='block';
+				orderDBList.innerHTML = finallist;
+				
+			}
+			
+			function unfinishedOrderFailure(){
+				progressbar.style.display = 'none';
+				mui.toast("未查询到相关订单!");
+			}
+			
+			
+			// 取消订单成功
+			function cancelOrderSuccess(data){
+				// 取消订单成功
+				alert("订单取消成功！"); 
+				// Janine20170106修改:取消订单成功后页面刷新
+				window.location.reload();
+			}
+			
+			// 取消订单失败
+			function cancelOrderFailure(data){
+				// 取消订单的接口
+				alert("取消订单失败！");
+				// Janine20170106修改:取消订单成功后页面刷新
+				window.location.reload();
+			}
+			
+			// 继续支付成功
+			function continuePaySuccess(data){
+				// 继续支付初始化
+				ajax_continuePayInit({});
+			}
+			
+			// 继续支付初始化成功
+			function continuePayInitSuccess(data){
+				console.log("continuePayInitSuccess.lishi--->" + localStorage.getItem("lishi"));
+				// Janine2017011修改:此处要传个乘车人类型
+				var purpose_codesStr = data.passangerForm.ticket_type_name;
+				var purpose_codes;
+				if(purpose_codesStr == "成人票"){
+					purpose_codes = "ADULT";
+				}else if(purpose_codesStr == "学生票"){
+					purpose_codes = "ADULT";
+//					purpose_codes = "0X00"
+				}
+				
+				if(dataItem.data.orderDBList[0].pay_flag == "Y"){
+					
+					//打开订单页面          
+					mui.openWindow({
+						url: '../payOrder.html',
+						id: 'payOrder.html',
+						extras:{
+					 		lishi : localStorage.getItem("lishi"),                        // 历时
+					 		start_time : data.ticketForm.start_time,                      // 出发时间
+					 		arrive_time : data.ticketForm.arrive_time,                    // 到达时间
+							station_train_code : data.ticketForm.station_train_code,      // 车次
+							from_station_name : data.ticketForm.from_station_name,        // 出发站
+							to_station_name : data.ticketForm.to_station_name,            // 目的站
+							tour_flag : data.ticketForm.tour_flag,                        // 单程
+							train_date : data.ticketForm.train_date,                      // 乘车日期
+							week : data.ticketForm.week,                                  // 星期
+							passangerForm : data.passangerForm,                           // 乘车人的数组
+							parOrderDTOJson : data.parOrderDTOJson,	 		  // Janine20170109修改 : 从payOrderInit.do接口中获取
+							orderRequestDTOJson : data.orderRequestDTOJson,   // Janine20170109修改 : 从payOrderInit.do接口中获取
+							purpose_codes : purpose_codes
+						} //额外扩展参数
+					});
+				}else if(dataItem.data.orderDBList[0].pay_resign_flag == "Y"){
+					if(data.passangerForm[0].old_ticket_price >= data.passangerForm[0].amount){
+						console.log("Janine:continuePayInitSuccess(data).进入.for.if--->"
+								+ data.passangerForm[0].old_ticket_price+","
+								+ data.passangerForm[0].amount);
+						//打开订单页面
+						mui.openWindow({
+							url: '../MealAndChange/payOrderGc.html',
+							id: 'payOrderGc.html',
+							extras:{
+								lishi : localStorage.getItem("lishi"),      // 历时
+								dataItem : data,                        // 将整个初始化改签付款获得的数组闯过来
+								sign : "IncompleteOrder"
+							} //额外扩展参数
+						});
+					}
+					
+					if(data.passangerForm[0].old_ticket_price < data.passangerForm[0].amount){
+						console.log("Janine:continuePayInitSuccess(data).进入.for.if--->"
+								+ data.passangerForm[0].old_ticket_price+","
+								+ data.passangerForm[0].amount);
+							
+						//打开订单页面
+						mui.openWindow({
+							url: '../MealAndChange/payOrderGcTow.html',
+							id: 'payOrderGcTow.html',
+							extras:{
+								lishi : localStorage.getItem("lishi"),      // 历时
+								dataItem : data,                        // 将整个初始化改签付款获得的数组闯过来
+								sign : "IncompleteOrder"
+							} //额外扩展参数
+						});
+					}
+				}
+			}
+		</script>
+	</body>
+
+</html>

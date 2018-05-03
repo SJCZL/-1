@@ -1,0 +1,181 @@
+<!doctype html>
+<html>
+
+	<head>
+		<meta charset="UTF-8">
+		<title>车次查询</title>
+		<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+		<link href="../css/mui.min.css" rel="stylesheet" />
+		<style>
+			.mui-btn {
+				width: 100%;
+				height:50px;
+				font-size: 25px;
+			}
+			.button{
+				height:40px;
+				margin-top: 7%;
+				margin-bottom: 7%;
+		    }
+		</style>
+	</head>
+
+	<body>
+		<div class="mui-content">
+		    <ul class="mui-table-view">
+		        <li class="mui-table-view-cell" style="margin-right: 4%;">
+		             <div class="mui-table" style="font-size: 14px;">
+						<div class="mui-table"  >
+							<div class="mui-table-cell mui-col-xs-2">
+								日期：	
+							</div>
+							<div  class="mui-table-cell mui-col-xs-2 " style="">
+								<div style="margin-left: -65%;">
+									<button id="date_time"  style="margin-top: -6%;margin-bottom: -3%;width:70%;">
+										<!--<font style="font-size: 18px;">2016-06-14</font>
+										<img src="../../img/calendar.png" style="margin:-2% 0 -4% 10%; "/>-->
+									</button>
+								</div>
+						    </div>
+						</div>      
+					    <div  class="mui-table-cell mui-col-xs-2 ">
+							<div style="margin-left: -40%; ">车次：</div>
+						</div>
+						<div  class="mui-table-cell mui-col-xs-2 ">
+							<div class="mui-input-row" style="margin-left: -60%;">
+							    <input id="train_code" type="text" placeholder="G12" value="G12" style="width: 90%; margin-bottom:0%;">
+							</div>
+					    </div>
+					</div>           
+		        </li>
+		        <li class="mui-table-view-cell" style="margin-right: 4%;">
+		            <div class="mui-table" style="font-size: 14px;">
+						<div  class="mui-table-cell mui-col-xs-2 ">
+							<div >验证码：</div>
+						</div>
+						<div  class="mui-table-cell mui-col-xs-2 ">
+							<div class="mui-input-row" style="margin-left: -40%;">
+							    <input id="randCode" type="text"  name="randCode" style="width: 90%; margin-bottom:0%;">
+							</div>
+					    </div>
+					    <div  class="mui-table-cell mui-col-xs-2 ">
+							<div class="mui-input-row" style="margin-left: -0%; width: 80%;">
+							    <img src="" id="captcha" > 
+							</div>
+					    </div>
+					    <div  class="mui-table-cell mui-col-xs-2 " >
+							<div class="mui-input-row" >
+							    <button  id="change" style="font-size: 8px;" >换一张</button>
+							</div>
+					    </div>     
+		       </li>
+		    </ul>
+		    <div class="mui-content-padded" align="center">
+		        <button id="Select" type="button" class="mui-btn mui-btn-blue ">查询</button>
+	        </div>
+		</div>
+		<script src="../js/mui.min.js"></script>
+		<script type="text/javascript" src="../js/guide.js" ></script>
+		<script type="text/javascript" src="../js/jquery-1.11.1.js" ></script>
+		<script type="text/javascript" src="../js/date_time.js" ></script>
+		<script type="text/javascript">
+			mui.init({
+				//swipeBack: true,   //mui框架封装的页面右滑关闭功能，默认未启用，若要使用右滑关闭功能，需要在mui.init();方法中设置swipeBack参数，
+			})
+			var imgUrl;
+			var train_code;
+			var randCode;
+			var change;
+			var date_time;
+			var Select;
+			var station_code;
+			var time;
+			mui.plusReady(function(){	
+				ajax_getPassCodeNew({});
+				
+				date_time=document.getElementById('date_time');
+				train_code=document.getElementById('train_code');  //车次
+				randCode=document.getElementById('randCode');
+				change=document.getElementById('change');
+				Select=document.getElementById('Select');
+				
+				date_time.innerHTML=set_dateTime(get_date_time());
+				
+				date_time.addEventListener('tap', function() {
+					mui.openWindow({
+						url: '../html/calendar.html',
+						id: '../html/calendar.html',
+						extras:{
+							data : "guide/queryTrainInfo_needtem.html",
+							title:"车次查询",
+						}
+				   });
+				});
+				var currentWebview = plus.webview.currentWebview();
+				var parentWebview = currentWebview.parent();
+				mui.fire(parentWebview ,'getCategoryID',{});
+				window.addEventListener('postCategoryID',function(e){
+				    console.log(e.detail.data_time);
+				    console.log(typeof e.detail.data_time);
+				    if(typeof(e.detail.data_time)!="undefined")
+					    date_time.innerHTML=set_dateTime(e.detail.data_time);
+			    });
+				
+				change.addEventListener('tap', function() { //换一张验证码
+					ajax_getPassCodeNew({});
+				}); 
+				
+				Select.addEventListener('tap', function() {
+					ajax_checkForGuide({
+						randCode:randCode.value,
+					}); 
+				}); 
+			});
+			
+			function set_dateTime(data){
+				time=data;
+				console.log(data);
+				var list='';
+				list=list+  '<font style="font-size: 14px;">'+data+'</font>'+
+							'<img src="../img/calendar.png" style="margin:-2% 0 -4% 10%; "/>';
+				return list;
+			}
+
+            //成功获取验证码
+			function getPassCodeNewSuccess(data){
+				console.log("getPassCodeNewSuccess.进入--->");
+				console.log("getPassCodeNewSuccess.JSON.stringify(data)--->" + JSON.stringify(data.result));
+				//captcha位置显示验证码
+				$("#captcha").attr("src", data.result.imgUrl);
+	    	    $("#randCode").val("");					
+			}
+			
+			//成功验证验证码
+			function checkForGuideSuccess(data){
+				console.log("checkForGuideSuccess.进入--->");
+				console.log("checkForGuideSuccess.JSON.stringify(data)--->" + JSON.stringify(data.data.result));
+				console.log(time);
+				
+				ajax_queryTrainInfo({
+					train_no : train_code.value,
+                    train_date : time,
+                    randcode : randCode.value,
+				});
+			}
+			function queryTrainInfo(data){
+				var self=plus.webview.currentWebview();  
+                console.log(self.id)
+				if(data.status==true){
+					mui.openWindow({
+						url: 'queryTrainInfoDetail.html',
+						id: 'queryTrainInfoDetail.html',
+						extras:{
+							data : data,
+						}
+				    });
+				};
+				
+			}
+		</script>
+	</body>
+</html>

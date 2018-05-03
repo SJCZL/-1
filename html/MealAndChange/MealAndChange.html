@@ -1,0 +1,104 @@
+<!doctype html>
+<html>
+
+	<head>
+		<meta charset="UTF-8">
+		<title></title>
+		<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+		<link href="../../css/mui.min.css" rel="stylesheet" />
+	</head>
+
+	<body>
+		<header class="mui-bar mui-bar-nav">
+		    <a class="mui-action-back mui-icon mui-icon-left-nav mui-pull-left"></a>
+		    <h1 class="mui-title">改签/变更到站</h1>
+		</header>
+		<div class="mui-content">
+		    <ul class="mui-table-view">
+		        <li class="mui-table-view-cell">
+		           <div class="mui-table">
+						<div class="mui-table-cell mui-col-xs-2">
+							<p style="font-size: 16px;">修改目的地</p>
+						</div>
+						<div class="mui-table-cell mui-col-xs-2">
+							<input id="to_station" type='text'/>
+						</div>
+					</div>    
+		        </li>
+		        <li class="mui-table-view-cell">
+		            <div class="mui-table">
+						<div class="mui-table-cell mui-col-xs-2">
+							<p style="font-size: 16px;">修改出发日期</p>
+						</div>
+						<div class="mui-table-cell mui-col-xs-2">
+							<input id="arrive_date" type='date' value="javascript:nowDate();"/>
+							<!--<input id="arrive_week" type='week' value="javascript:nowDate();"/>-->
+						</div>
+					</div>        
+		        </li>
+		    </ul>
+		    <div class="mui-content-padded" align="center">
+		        <button id="meal_change" type="button" class="mui-btn mui-btn-blue">改签/变更到站</button>
+	        </div>
+		</div>
+		
+		
+		<script src="../../js/mui.min.js"></script>
+		<script type="text/javascript" src="../../js/jquery-1.11.1.js" ></script>
+		<script type="text/javascript">
+			mui.init();
+			
+			// 定义当前页面
+			var self;
+			
+			// 定义接收上一届面数据的变量
+			var to_station;
+			var from_station;
+			var arrive_date;
+			var purpose_codes;
+			
+			// 定义各类控件
+			var to_station_text;
+			var arrive_date_text;
+			var meal_change_btn;
+			
+			mui.plusReady(function(){
+				
+				// 获取当前页面
+				self = plus.webview.currentWebview();  
+				
+				// 获取上一界面的数据
+				to_station = self.to_station;
+				from_station = self.from_station;
+				arrive_date = self.train_date;
+				purpose_codes = self.purpose_codes;
+				
+				// 获取各类控件
+				meal_change_btn = document.getElementById('meal_change');
+				
+				// 赋值
+				$("#arrive_date")[0].value = arrive_date;
+				$("#to_station")[0].value = to_station;
+				
+				// 改签/变更到站按钮点击
+				meal_change_btn.addEventListener('tap',function(){
+					console.log("Janine:meal_change_btn.点击事件--->");
+					mui.openWindow({
+						url : '../trainResultShow_main.html',
+						id : 'trainResultShow_main',
+						extras : {
+							//start_time = $("#start_date").val();
+							//需要传到下一个界面，乘车人的类型，乘车时间，出发站的车站码和目的站的车站码
+							purpose_codes: purpose_codes,    		            // 成人票或者学生票
+							train_date : $("#arrive_date").val(),               // 出发时间
+							from_station : from_station,                        // 车站名称
+							to_station : $("#to_station").val(),                // 同上
+							tour_flag : "gc",
+						}
+					});
+				});
+			});
+		</script>
+	</body>
+
+</html>

@@ -1,0 +1,231 @@
+<!doctype html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<title>正晚点查询ok</title>
+		<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+		<link href="../css/mui.min.css" rel="stylesheet" />
+		<style type="text/css">
+			.mui-btn {
+				width: 100%;
+				height:50px;
+				font-size: 25px;
+			}
+			.mui-content{
+				margin-top: -4%;
+			}
+			span {
+				padding-left: 17px;
+				line-height: 40px;
+				height: 40px;
+			}
+		</style>
+	</head>
+
+	<body>
+		<div class="mui-content">
+		   <ul class="mui-table-view">
+		        <li class="mui-table-view-cell">
+		             <div class="mui-input" style="font-size: 14px; margin-bottom: -2%;">
+						<span >查询类型</span>
+						<div class="mui-input-row mui-radio mui-left mui-pull-right" style=" width: 35%;margin-right: -5%;">
+							<label style="padding-left: 25%;">&nbsp;&nbsp;&nbsp;到达站</label>
+							<input name="station" type="radio" value="0"  style="margin-left: -10%;"/>
+						</div>
+						<div class="mui-input-row mui-radio mui-left mui-pull-right" style="width: 35%;">
+							<label style="padding-left: 35%;">&nbsp;&nbsp;&nbsp;出发站</label>
+							<input name="station" type="radio" value="1"  checked/>
+						</div>
+					</div>
+		        </li>
+		        <li class="mui-table-view-cell">
+		             <div class="mui-table" style="font-size: 14px;">
+						<div  class="mui-table-cell mui-col-xs-2 " >
+							<div style="margin-left: 25%; color:red;">*</div>
+						</div>	
+						<div  class="mui-table-cell mui-col-xs-2 ">
+							<div style="margin-left: -60%; ">车站</div>
+						</div>
+						<div  class="mui-table-cell mui-col-xs-2 ">
+							<button id="input_station"  style="width: 190%; margin-left: -100%;text-align: left;">合肥</button>
+					    </div>
+					</div>        
+		        </li>
+		        <li class="mui-table-view-cell">
+		             <div class="mui-table" style="font-size: 14px;">
+						<div  class="mui-table-cell mui-col-xs-2 " >
+							<div style="margin-left: 25%; color:red;">*</div>
+						</div>	
+						<div  class="mui-table-cell mui-col-xs-2 ">
+							<div style="margin-left: -60%; ">车次</div>
+						</div>
+						<div  class="mui-table-cell mui-col-xs-2 ">
+							<div class="mui-input-row" style="margin-left: -100%;">
+							    <input id="code_station" type="text" placeholder="k1264" vale="k1264" style="width: 95%; margin-bottom:0%; ">							</div>
+					    </div>
+					</div>        
+		        </li> 
+		        <li class="mui-table-view-cell">
+		             <div class="mui-table" style="font-size: 14px;">
+						<div  class="mui-table-cell mui-col-xs-2 " >
+							<div style="margin-left: 20%; color:red;">*</div>
+						</div>	
+						<div  class="mui-table-cell mui-col-xs-2 ">
+							<div style="margin-left: -60%; ">验证码</div>
+						</div>
+						<div  class="mui-table-cell mui-col-xs-2 ">
+							<div class="mui-input-row" style="margin-left: -30%;margin-right: -10%;">
+							    <!--<label>Input</label>-->
+							    <input id="randCode" type="text"  name="randCode" style="width: 90%;">
+							</div>
+					    </div>
+					    <div  class="mui-table-cell mui-col-xs-2 ">
+							<div class="mui-input-row" style="margin-left: 5%; width: 90%;margin-right: -20%;">
+							    <!--<label>Input</label>-->
+							    <img src="" id="captcha" > 
+							</div>
+					    </div>
+					    <div  class="mui-table-cell mui-col-xs-2 " >
+							<div class="mui-input-row" >
+							    <button  id="change" style="font-size: 8px;" >换一张</button>
+							</div>
+					    </div>
+					</div>        
+		        </li>
+		    </ul>
+		    <div class="mui-content-padded" align="center">
+		        <button id="Select" type="button" class="mui-btn mui-btn-blue " >查询</button>
+	        </div>
+	        <div  class="mui-table-cell mui-col-xs-2 " style="">
+	        	<div style="border: 1px #EC971F solid;margin-left: 3%;margin-right: 3%;margin-top:2%">
+	        		<div style="margin-top:2%">使用说明：</div>
+					<p>1.本查询提供未来三小时内列车正晚点信息</p>
+					<p>2.车站输入支持简拼/全拼/汉子输入，例如：[北京]-->BJ</p>
+					<p>3.本功能及查询结果仅作为参考，准确信息以车站公告为准</p>
+	        	</div>	        	
+		    </div>
+		</div>
+		<script src="../js/mui.min.js"></script>
+		<script type="text/javascript" src="../js/guide.js" ></script>
+		<script type="text/javascript" src="../js/jquery-1.11.1.js"></script>
+		<script type="text/javascript">
+			mui.init({
+				
+			});
+			var imgUrl;
+			var station;
+			var input_station;
+			var code_station;
+			var randCode;
+			var change;
+			var Select;
+			mui.plusReady(function() {	
+		
+				ajax_getPassCodeNew({});
+				
+				input_station=document.getElementById('input_station');  //车站
+				code_station=document.getElementById('code_station'); //车次
+				randCode=document.getElementById('randCode');
+				change=document.getElementById('change');
+				Select=document.getElementById('Select');
+				
+				
+				//取出本地的存储值并赋值
+				if(localStorage.getItem('zwdcx_input_station')!=null) {
+					console.log(localStorage.getItem('zwdcx_input_station'));
+					input_station.innerHTML= localStorage.getItem('zwdcx_input_station');
+				}
+				
+				input_station.addEventListener('tap', function() { 
+					var address="guide/zwdcx_needtem.html";  // 返回数据时的地址
+					mui.openWindow({
+						url: '../html/station.html',
+						id: 'station',
+						extras: {
+							station: "车站", //将出发站的title传过去
+							address: address ,
+							title:"正晚点查询"
+						}
+					});
+				});
+				
+				var currentWebview = plus.webview.currentWebview();
+				var parentWebview = currentWebview.parent();
+				mui.fire(parentWebview ,'getCategoryID',{});
+				//接收data_time数据
+				window.addEventListener('postCategoryID',function(e){
+					if(typeof(e.detail.station_name)!="undefined"){  //如果在选择车站时，没有点击任何时间值，则返回的值为空
+		                input_station.innerHTML=e.detail.station_name;
+		                localStorage.setItem('zwdcx_input_station',e.detail.station_name);
+		            }
+			   });
+				
+				//换一张验证码
+				change.addEventListener('tap', function() { 
+					ajax_getPassCodeNew({});
+				}); 
+				
+				//查询按钮
+				Select.addEventListener('tap', function() {
+					ajax_checkForGuide({
+						randCode:randCode.value,
+					}); 
+					
+				}); 
+			});
+			
+			//成功获取验证码
+			function getPassCodeNewSuccess(data){
+				console.log("getPassCodeNewSuccess.进入--->");
+				console.log("getPassCodeNewSuccess.JSON.stringify(data)--->" + JSON.stringify(data.result));
+				//captcha位置显示验证码
+				$("#captcha").attr("src", data.result.imgUrl);
+	    	    $("#randCode").val("");					
+			}
+			
+			//成功验证验证码
+			function checkForGuideSuccess(data){
+				console.log("checkForGuideSuccess.进入--->");
+				console.log("checkForGuideSuccess.JSON.stringify(data)--->" + JSON.stringify(data.data.result));
+				if(data.data.result==1){
+					getChecked();   //判断查询类型
+					ajax_zwdcx({   //正晚点查询
+						cc :code_station.value,
+                        cxlx :station,
+                        cz :input_station.value,
+                        randCode :randCode.value
+					})
+				}
+			}
+			function getChecked(){
+				var station_num=document.getElementsByName("station")
+				for(var i=0;i<station_num.length;i++){ 
+					console.log(station_num.length);
+					console.log(station_num[i].value);
+                    if(station_num[i].checked==true){//得到选中的单选按钮如果要得到值 
+                        station=station_num[i].value;
+                    } 
+                } 
+			}
+			
+			function zwdcxSuccess(data){
+				console.log("zwdcxSuccess.进入--->");
+				console.log("zwdcxSuccess.JSON.stringify(data)--->" + JSON.stringify(data.status));
+				if(data.status==true){
+					alert(data.data.message);
+				}
+				// 获得列表界面的webview
+				var list  = plus.webview.getWebviewById('template-main.html');   
+				// 触发前往页面的自定义事件（例：AddNew）,从而进行数据刷新
+				mui.fire(list ,'refresh',{
+					address_id:"template-sub.html",
+					title:"正晚点查询",
+				});
+				// 返回true，继续页面关闭逻辑
+				return true;
+			}
+			
+		</script>
+	</body>
+
+</html>

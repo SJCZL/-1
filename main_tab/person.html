@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+    <title></title>
+    <link rel="stylesheet" type="text/css" href="../css/mui.min.css"/>
+    <link rel="stylesheet" type="text/css" href="../css/own.css"/>
+    
+    <style type="text/css">
+    		.headImg {
+    			padding: 8% 0px 13% 0px;
+    			background: url(../img/bg.jpeg);
+    			background-position: center center; 
+    			background-size: 100% auto;
+    		}
+    		
+    		.touxiang {
+    			text-align: center;
+    		}
+    		.touxiang div {
+    			width: 4em;
+    			height: 4em;
+    			padding: 0px;
+    			border-radius: 50%;
+    			border: 2px solid white;
+    			color: gray;
+    			margin: 0px auto;
+    			margin-bottom: 5px;
+    		}
+    		.mui-table-view-cell{
+    			height: 50px;
+    		}
+    		
+    </style>
+</head>
+<body>
+	<!--
+    	
+    	描述：该界面主要是"个人信息"界面。该界面中主要是三个订单-未完成、未出行、历史等订单,
+    		其次是登录和退出功能,最后就是登录和退出时,界面的动态变化
+    -->
+	<div class="mui-content">
+		<div class="headImg">
+			<div class="touxiang">
+				<div >
+					<span id="headimg" class="mui-icon mui-icon-person" style="font-size: 3.8em; color: white;"></span> 
+					<!--src="../img/bg.jpeg"--> 
+					<img id="trueimg" style="width: 100%; height: 100%; border-radius: 50%;" />	
+				</div>
+				<span id="imgwords"></span>
+			</div>
+		</div>
+		<!--
+        	
+        
+        	描述：此处是未完成、未出行、历史三个订单的布局样式
+        -->
+		<ul class="mui-table-view" style="margin-top: 10px;">
+			<li class="mui-table-view-cell" style="height:40px;vertical-align:middle;">
+				<!--
+                	
+                	描述：mui-navigate-right:导航箭头靠右且向右
+                -->
+				<a id="unfinishedOrder" class="mui-navigate-right">
+					 未完成订单
+				</a>
+			</li>
+			<li class="mui-table-view-cell" style="height:40px;vertical-align:middle;">
+				<a id="finishedOrder_G" class="mui-navigate-right">
+					未出行订单
+				</a>
+			</li>
+			<li class="mui-table-view-cell" style="height:40px;vertical-align:middle;">
+				<a id="finishedOrder_H" class="mui-navigate-right">
+					历史订单
+				</a>
+			</li>
+		</ul>
+		<!--
+        	
+        	描述：以后再添加
+        -->
+		<ul class="mui-table-view" style="margin-top: 10px;" id="unload">
+			<li class="mui-table-view-cell" style="height:40px;vertical-align:middle;">
+				<a class="mui-navigate-right" href="#">
+				    帮助中心
+				</a>
+			</li>
+			<li class="mui-table-view-cell" style="height:40px;vertical-align:middle;">
+				<a class="mui-navigate-right" href="#">
+					关于动高
+				</a>
+			</li>
+			<li class="mui-table-view-cell" style="height:40px;vertical-align:middle;">
+				<a class="mui-navigate-right" href="#">
+					更多
+				</a>
+			</li>
+		</ul>
+		<!--
+    		
+    		描述：退出登录按钮
+    	-->
+    	<button id="logout" class="mui-btn mui-btn-block" style="margin-top:20px;color: indianred;text-align: center;display: none;">
+    		退出登录
+    	</button>
+		
+		
+	</div>
+	<!--
+    	
+    	描述：该处调用了两个JS文件,分别是mui.js和用于接口实现的ajax.js
+    -->
+	<script src="../js/mui.min.js" charset="UTF-8"></script>
+	<script src="../js/ajax.js" charset="UTF-8"></script>
+	
+	<script type="text/javascript" charset="UTF-8">
+		mui.init({
+			swipeBack:false,
+			preloadPages:[{
+      			url:'person.html',
+      			id:'person'
+    		}]
+		});
+		
+		/**
+		 * 
+		 * Janine-测试:暂时不做登录和退出的界面转换,先显示“退出登录”按钮,测试退出登录是否成功！
+		 * 
+		 * Janine:“未登录”与“登录”状态的转化已完成
+		 */
+		
+		var unfinishedOrder;
+		var finishedOrder_G;
+		var finishedOrder_H;
+		var logoutBtn;
+		
+		var headimg;                           
+		var trueimg;
+		var imgwords;
+		
+		mui.plusReady(function(){
+			
+			//获取appkey：在调用所有接口之前，首先调用该接口获取到appkey，作为其他接口的凭证，在调用其他接口时，部分要传这个appkey
+			if (!localStorage.getItem('app_key')) {
+				console.log("app_key为空！");
+				ajax_get_appkey({}); //调用app_key接口的方法
+			} 
+			
+			// Janine:下面的变量需要根据用户登录的状态进行改变
+			headimg = document.getElementById('headimg');              // “未登录”状态的头像
+			trueimg = document.getElementById('trueimg');			   // “已登录”状态的头像
+			imgwords = document.getElementById('imgwords');            // 显示“已登录”或“未登录”的字样
+			
+			// Janine:三个主要功能:未完成、未出行和历史订单,主要的作用是显示文字和点击跳转
+			unfinishedOrder = document.getElementById('unfinishedOrder');      
+			finishedOrder_G = document.getElementById('finishedOrder_G');      
+			finishedOrder_H = document.getElementById('finishedOrder_H');      
+			
+			// Janine:"退出登录"的按钮控件获取
+			logoutBtn = document.getElementById('logout');                    
+			
+			/**
+			 * Janine:登录时,需要使用的接口如下:
+			 * 1.checkForLogin.do:检测登录验证码是否正确;
+			 * 2.checkUser.do:检查用户是否登录;
+			 * 3.loginUser.do:确认以上信息无误后,再使用该接口
+			 */
+			ajax_checkUser({});
+			
+			// Janine:"未完成订单"的点击跳转,进入"未完成订单"界面
+			unfinishedOrder.addEventListener('tap',function(){
+				console.log("Janine:unfinishedOrder.未完成订单点击事件--->");
+				mui.openWindow({
+					url: '../html/MyOrder/IncompleteOrders.html',
+					id: 'unfinishedOrder',
+				});
+				
+			});
+			
+			// Janine:"未出行订单"的点击跳转,进入"未出行订单"界面
+			finishedOrder_G.addEventListener('tap',function(){
+				console.log("Janine:finishedOrder_G.未出行订单点击事件--->");
+				// G代表未出行
+				mui.openWindow({
+					url: '../html/MyOrder/NoTravelOrdersQuery.html',
+					id: 'NoTravelOrdersQuery.html',
+				});
+				
+			});
+			
+			// Janine:"历史订单"的点击跳转,进入"历史订单"界面
+			finishedOrder_H.addEventListener('tap',function(){
+				console.log("Janine:finishedOrder_H.历史订单点击事件--->");
+				// H代表历史
+				mui.openWindow({
+					url: '../html/MyOrder/HistoryOrdersQuery.html',
+					id: 'HistoryOrdersQuery.html',
+				});
+				
+			});
+			
+			// Janine:点击“未登录”的头像,先进行简单的判断
+			headimg.addEventListener('tap',function(){
+				console.log("Janine:****未登录的头像--->");
+				
+				// 如果“未登录”,则点击“未登录”的头像有效
+				if(imgwords.innerHTML == "未登录"){
+					//打开登录页面          
+  					mui.openWindow({
+    					url:'../html/login.html',
+    					id:'../html/login.html'
+  					});
+  				}
+			});	
+		
+			// Janine:点击"退出登录"
+			logoutBtn.addEventListener('tap',function(){
+				// "退出登录"的提示框
+				var btnArray = ['确认', '取消'];
+				mui.confirm('是否退出登录？',function(e) {
+					if (e.index == 0) {
+						console.log("Janine:****退出登录--->");
+						// Janine:loginOut.do:退出登录
+                        ajax_logout({});
+					}
+				});
+			},false);
+		});
+		
+		/**
+		 * Janine:checkUser.do:检查用户是否登录,检测成功后,进行判断,如果“已登录”
+		 */
+		function checkUserSuccess(data) {
+			console.log("Janine:checkUserSuccess.进入--->");
+			dataItems = data.result;
+			// 假如status状态为ture，说明用户已登录
+			if (dataItems.data.flag ==true) {
+				// 登录成功,显示“退出登录”按钮
+				logoutBtn.style.display = 'block';
+				// Janine:对头像的处理,显示登录头像,隐藏“未登录”时的图片
+				headimg.style.display = 'none';
+				trueimg.style.display = 'inline';
+				trueimg.src = '../img/touxiang.jpg';
+				
+				// 获取登录时存储的用户名,并显示出来
+				var user = localStorage.getItem('account');
+				imgwords.style.color = 'black';
+				imgwords.innerText = user + ",您好!";
+				
+			}else if(dataItems.data.flag == false){
+				// Janine:如果“未登录”,则隐藏“退出登录”按钮
+				logoutBtn.style.display = 'none';
+				// 显示“未登录”状态下的默认头像,隐藏真正的头像
+				headimg.style.display = 'inline';
+				trueimg.style.display = 'none';
+				// 设置“未登录”的字样,以及样式
+				imgwords.innerHTML = "未登录";
+				imgwords.style.color = 'indianred';
+			}else{
+				mui.alert(dataItems.messages);
+				window.location.reload();
+			}
+		}
+
+		/**
+		 * Janine:当退出成功后,有两种情况:
+		 * (1)类似于“再按一次退出应用”
+		 * (2)让当前页面刷新,然后加载显示“未登录”状态——如果需要页面刷新,就需要页面再次检测用户的登录状态
+		**/
+		function logoutSuccess(data){
+			mui.toast(data.msg);
+			// Janine:data.result.code == 1表示退出成功
+			if (data.result.code == 1) {
+				
+				// Janine:检测之前有没有值
+				console.log("Janine:logoutSuccess.localStorage--->"
+						+ localStorage.getItem('account')
+						+ localStorage.getItem('app_key'));
+				// (2)首先,移除之前存储的用户名
+				localStorage.removeItem('account');
+
+				// 同时移除appkey
+				localStorage.removeItem('app_key');
+				// Janine:如果清楚成功,就不会得到localStorage.get('user')的值
+				console.log("Janine:logoutSuccess.localStorage--->"
+						+ localStorage.getItem('account')
+						+ localStorage.getItem('app_key'));
+					// Janine:为这个APP获取新的appkey
+					// (1)Janine:退出应用,该方法不符合该APP的页面逻辑,可以以后使用
+					// plus.runtime.quit();
+			}
+			// 然后,Janine:退出成功,则再次检测用户的登录状态
+			// ajax_checkUser({});
+			
+			var person = plus.webview.getWebviewById(plus.runtime.appid); //这里可能返回空；
+			console.log("Janine:退出登录后,刷新的页面是否为空？" + person);
+			mui.fire(person ,'personReload');
+		}
+		
+		// 关闭启动页面使用户感觉白屏时间短
+		function closeStartScreent(){
+			// 创建父子模版完成后关闭启动页面
+			plus.navigator.closeSplashscreen();
+		}
+	</script>
+</body>
+</html>

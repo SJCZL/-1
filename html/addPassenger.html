@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html>
+
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+		<title></title>
+		<script src="../js/mui.min.js"></script>
+		<link href="../css/mui.css" rel="stylesheet" />
+
+		<style type="text/css">
+			.mui-btn {
+				width: 95%;
+			}
+			
+			.mui-radio>label {
+				font-size: 16px;
+				padding-left: 39%;
+			}
+			
+			.mui-input {
+				font-family: 'Helvetica Neue', Helvetica, sans-serif;
+				width: 100%;
+				height: 40px;
+			}
+			
+			span {
+				padding-left: 17px;
+				line-height: 40px;
+				height: 40px;
+			}
+		</style>
+	</head>
+
+	<body>
+		<header class="mui-bar mui-bar-nav">
+			<a class="mui-action-back mui-icon mui-icon-left-nav mui-pull-left"></a>
+			<h1 class="mui-title">添加乘客</h1>
+		</header>
+
+		<div class="mui-content">
+			<form class="mui-input-group">
+				<div class="mui-input-row">
+					<label>姓名</label>
+					<input type="text" class="mui-input-clear" placeholder="请输入真实姓名" id="username">
+				</div>
+
+				<div class="mui-input-row">
+					<label>证件号码</label>
+					<input type="text" class="mui-input-clear" placeholder="请输入真实身份证号码" id="password">
+				</div>
+
+				<div class="mui-input">
+					<span>乘客类型</span>
+					<div class="mui-input-row mui-radio mui-left mui-pull-right" style=" width: 35%;">
+						<label style="padding-left: 39%;">成人票</label>
+						<input name="radio" type="radio" checked/>
+					</div>
+					<div class="mui-input-row mui-radio mui-left mui-pull-right" style="width: 35%;">
+						<label style="padding-left: 39%;">儿童票</label>
+						<input name="radio" type="radio" />
+					</div>
+
+				</div>
+			</form>
+
+			<div align="center" style="margin-top: 12px;">
+				<button type="button" class="mui-btn mui-btn-blue " id="added">添加</button>
+			</div>
+		</div>
+
+		<!--添加事件-->
+		<script type="text/javascript" charset="utf-8">
+			/**
+			 * 添加的乘客信息，需要返回到
+			 */
+			
+			//初始化预加载页面
+			mui.init();
+			//点击注册按钮时，添加响应事件
+			mui.plusReady(function() {
+				document.getElementById("added").addEventListener('tap', function() {
+					var username = document.getElementById("username");
+					var password = document.getElementById("password");
+					if (username.value.length == 0 && password.value.length == 0) {
+						plus.ui.toast("请输入相应信息");
+						if (username.value.length == 0){
+							plus.ui.toast("乘客姓名不能为空");
+							return;
+						}
+						if (password.value.length == 0) {
+							plus.ui.toast("证件号码不能为空");
+							return;
+						}
+					}
+					
+					mui.ajax('', {
+						data: {
+							account: username.value,
+							password: password.value
+								//							catogry:selectvalue;
+						},
+						dataType: 'json',
+						type: 'POST',
+						// type:'get',
+						timeout: 10000,
+
+						success: function(data) {
+
+							if (data.result == 0) {
+								plus.ui.toast("添加成功");
+								//将用户名与密码放进本地的存储中保存
+								plus.storage.setItem('username', username.value);
+								plus.storage.setItem('password', password.value);
+								//登录成功后跳转页面
+								mui.openWindow({
+									url: 'select.html',
+									id: 'select',
+									extras: {
+										name: username.value,
+										number: password.value,
+										// catogry:selectvalue
+									},
+
+								})
+							} else {
+								plus.ui.toast("添加失败");
+							}
+						},
+						error: function() {}
+					})
+				})
+			})
+		</script>
+	</body>
+
+</html>

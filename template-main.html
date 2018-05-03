@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+    <title>E3</title>
+    	<link rel="stylesheet" type="text/css" href="css/mui.min.css"/>
+    	<link rel="stylesheet" type="text/css" href="css/iconfont.css"/>
+    	
+    	<style type="text/css">
+    		.mui-icon-left-nav,
+    		.mui-bar-nav h1,
+    		.mui-pull-right {
+    			color: gray;
+    		}
+    		.mui-content {
+    			font-size: 0.8em;
+    			color: gray;
+    			text-align: center;
+    		}
+    	</style>
+</head>
+<body>
+	<header class="mui-bar mui-bar-nav">
+		<a class="mui-action-back mui-icon mui-icon-left-nav mui-pull-left"></a>
+		<h1 class="mui-title">模版界面</h1>
+		
+		<a id="rightBar" class="mui-icon mui-icon-personadd mui-pull-right"></a>
+	</header>
+	
+	<div class="mui-content">
+		<div style="margin-top: 70px;">
+			<a>
+				<span ><img src="img/jump.gif" style="max-width:2em; height:auto;"/></span>
+			</a>
+			<br />
+			<span>加载中...</span>
+		</div>
+	</div>
+	<!--<nav class="mui-bar mui-bar-tab">
+		<a id="defaultTab" class="mui-tab-item mui-active" href="main_tab/tickets.html">
+			<span class="mui-tab-label">购票</span>
+		</a>
+		<a class="mui-tab-item" href="main_tab/orders.html">
+			<span class="mui-tab-label">出行向导</span>
+		</a>
+		<a class="mui-tab-item" href="main_tab/person.html">
+			<span class="mui-tab-label">个人中心</span>
+		</a>
+	</nav>-->
+	<script src="js/mui.min.js" charset="UTF-8"></script>
+	<script type="text/javascript" charset="UTF-8">
+		mui.init({
+			swipeBack:true 
+		});
+		
+		var contentWebview = null; 
+		var self = null;		
+		var rightBar;
+		var title; 
+		var data_time;
+		var station_name;
+		var title_name;
+		var subpages = ['main_tab/tickets.html','main_tab/orders.html', 'main_tab/person.html'];//tab标签的页面数组
+		var subpagesView = {};//每个tabitem所对应显示的页面对象
+		
+		mui.plusReady(function(){
+			
+			//获取dom节点
+			self = plus.webview.currentWebview();
+			title = document.querySelector('.mui-title');
+			rightBar = document.getElementById('rightBar');
+			
+//			initWebView();
+//			addTabitemEventListener();
+			//为rightbars添加事件
+			rightBar.addEventListener('tap',function(){
+				if (contentWebview == null) {
+					contentWebview = self.children()[0];
+				}
+				mui.fire(contentWebview,'pressRightBar',{
+					
+				});
+			},false);
+//			
+			//接收templateFire事件添加templateFire自定义事件监听
+			window.addEventListener('templateFire',function(options){
+				title.innerText = options.detail.title;
+				data_time=options.detail.data_time; 
+				title_name=options.detail.title_name;
+				station_name=options.detail.station_name;
+				
+				console.log(options.detail.title_name);
+				var id = options.detail.id;
+//				页面显示动画，默认为”slide-in-right“；
+				var aniShow = options.detail.aniShow;
+				//target 表示链接打开的目标窗口
+				var href = options.detail.target;
+				var isBars = options.detail.isBars;
+				var barsIcon = options.detail.barsIcon;
+				if (isBars) {
+					rightBar.style.display = 'inline';
+					rightBar.className = barsIcon + ' mui-pull-right';
+					
+				}else {
+					rightBar.style.display = 'none';
+				}
+				if (mui.os.android&&aniShow&&parseFloat(mui.os.version)>=4.4) {
+					if (contentWebview == null) {
+						contentWebview = self.children()[0];
+					}
+					var str = contentWebview.getURL();
+					console.log(str);
+					console.log(href);
+					var index = str.indexOf('www/');
+					str = str.substring(index+4);
+					console.log(str);
+					if ((!~id.indexOf('Startstation-datile') && !~id.indexOf('goods-detail') )&&(contentWebview.getURL() == href)) {
+						console.log("123");
+						console.log("loaded");
+						contentWebview.show();
+					}else {
+						console.log("456");
+						console.log("new load");
+						contentWebview.loadURL(href);
+					}
+					self.show(aniShow);
+				}
+			},false);
+			
+			//接收子页面的获取categoryID的事件 字符串，事件名称，不含“on”
+			window.addEventListener('getCategoryID',function(e){
+				if (contentWebview == null) {
+					contentWebview = self.children()[0];
+				}
+				mui.fire(contentWebview,'postCategoryID',{
+					title:title.innerText,
+					data_time:data_time,
+					title_name:title_name,
+					station_name:station_name,
+				});
+			},false);
+			
+			window.addEventListener('refresh',function(e){
+				console.log("进入刷新------->");
+				console.log(e.detail.address_id);
+				var id=plus.webview.getWebviewById(e.detail.address_id);
+				console.log(id.id);
+				title.innerText=e.detail.title;
+				console.log(e.detail.title);
+			    id.reload();
+			});
+		});
+		
+
+	</script>
+	
+</body>
+</html>

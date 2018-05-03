@@ -1,0 +1,201 @@
+<!doctype html>
+<html>
+
+	<head>
+		<meta charset="UTF-8">
+		<title>车站车次查询</title>
+		<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+		<link href="../css/mui.min.css" rel="stylesheet" />
+		<style>
+			.mui-btn {
+				width: 100%;
+				height:50px;
+				font-size: 25px;
+			}
+			.button{
+				height:40px;
+				margin-top: 7%;
+				margin-bottom: 7%;
+		    }
+		</style>
+	</head>
+
+	<body>
+		<div class="mui-content">
+		    <ul class="mui-table-view">
+		        <li class="mui-table-view-cell" style="margin-right: 4%;">
+		             <div class="mui-table" style="font-size: 14px;">
+						<div class="mui-table"  >
+							<div class="mui-table-cell mui-col-xs-2">
+								乘车日期：	
+							</div>
+							<div  class="mui-table-cell mui-col-xs-2 " style="">
+								<div style="margin-left: -45%;">
+									<button id="date_time"  style="margin-top: -6%;margin-bottom: -3%;width:80%;">
+										<!--<font style="font-size: 18px;">2016-06-14</font>
+										<img src="../../img/calendar.png" style="margin:-2% 0 -4% 10%; "/>-->
+									</button>
+								</div>
+						    </div>
+						</div>     
+					    <div  class="mui-table-cell mui-col-xs-2 ">
+							<div style="margin-left: -20%; ">车站：</div>
+						</div>
+						<div  class="mui-table-cell mui-col-xs-2 ">
+							<button id="train_station" style="margin-left: -40%;width: 150%; margin-top:-2%;">合肥</button>
+					    </div>
+					</div>           
+		        </li>
+		        <li class="mui-table-view-cell" style="margin-right: 4%;">
+		            <div class="mui-table" style="font-size: 14px;">
+						<div  class="mui-table-cell mui-col-xs-2 ">
+							<div >验证码：</div>
+						</div>
+						<div  class="mui-table-cell mui-col-xs-2 ">
+							<div class="mui-input-row" style="margin-left: -40%;">
+							    <input id="randCode" type="text"  name="randCode" style="width: 90%; margin-bottom:0%;">
+							</div>
+					    </div>
+					    <div  class="mui-table-cell mui-col-xs-2 ">
+							<div class="mui-input-row" style="margin-left: -0%; width: 80%;">
+							    <img src="" id="captcha" > 
+							</div>
+					    </div>
+					    <div  class="mui-table-cell mui-col-xs-2 " >
+							<div class="mui-input-row" >
+							    <button  id="change" style="font-size: 8px;" >换一张</button>
+							</div>
+					    </div>     
+		       </li>
+		    </ul>
+		    <div class="mui-content-padded" align="center">
+		        <button id="Select" type="button" class="mui-btn mui-btn-blue ">查询</button>
+	        </div>
+		</div>
+		<script src="../js/mui.min.js"></script>
+		<script type="text/javascript" src="../js/guide.js" ></script>
+		<script type="text/javascript" src="../js/jquery-1.11.1.js" ></script>
+		<script type="text/javascript" src="../js/date_time.js" ></script>
+		<script type="text/javascript">
+			mui.init()
+			var imgUrl;
+			var train_station;
+			var randCode;
+			var change;
+			var date_time;
+			var Select;
+			var station_code;
+			mui.plusReady(function(){	
+				ajax_getPassCodeNew({});
+				
+				date_time=document.getElementById('date_time');
+				train_station=document.getElementById('train_station');  //车站
+				randCode=document.getElementById('randCode');
+				change=document.getElementById('change');
+				Select=document.getElementById('Select');
+				
+				date_time.innerHTML=set_dateTime(get_date_time());
+				if (localStorage.getItem('trainQuery_train_station')) {
+					train_station.innerHTML= localStorage.getItem('trainQuery_train_station');
+				}
+				
+				
+				//选择时间
+				date_time.addEventListener('tap', function() {
+					mui.openWindow({
+						url: '../html/calendar.html',
+						id: '../html/calendar.html',
+						extras:{
+							data : "guide/trainQuery_needtem.html",
+							title:"车站车次查询",
+						}
+				   });
+				});
+				
+				//选择车站
+				train_station.addEventListener('tap', function() {
+					var address="guide/trainQuery_needtem.html";  // 返回数据时的地址
+					mui.openWindow({
+						url: '../html/station.html',
+						id: 'station',
+						extras: {
+							station: "车站", //将出发站的title传过去
+							address: address ,
+							title:"车站车次查询"
+						}
+					});
+				});
+				var currentWebview = plus.webview.currentWebview();
+				var parentWebview = currentWebview.parent();
+				mui.fire(parentWebview ,'getCategoryID',{});
+				window.addEventListener('postCategoryID',function(e){	
+					if(typeof(e.detail.data_time)!="undefined")
+					    date_time.innerHTML=set_dateTime(e.detail.data_time);
+					if(typeof(e.detail.station_name)!="undefined"){  //如果在选择车站时，没有点击任何时间值，则返回的值为空
+		                train_station.innerHTML=e.detail.station_name;
+		                localStorage.setItem('trainQuery_train_station',e.detail.station_name);
+		            }
+				});
+				
+				change.addEventListener('tap', function() { //换一张验证码
+					ajax_getPassCodeNew({});
+				}); 
+				
+				Select.addEventListener('tap', function() {
+					ajax_checkForGuide({
+						randCode:randCode.value,
+					}); 
+					
+				}); 
+			});
+			
+			function set_dateTime(data){
+				time=data;
+				console.log(data);
+				var list='';
+				list=list+  '<font style="font-size: 14px;">'+data+'</font>'+
+							'<img src="../img/calendar.png" style="margin:-2% 0 -4% 10%; "/>';
+				return list;
+			}
+			//成功获取验证码
+			function getPassCodeNewSuccess(data){
+				console.log("getPassCodeNewSuccess.进入--->");
+				console.log("getPassCodeNewSuccess.JSON.stringify(data)--->" + JSON.stringify(data.result));
+				//captcha位置显示验证码
+				$("#captcha").attr("src", data.result.imgUrl);
+	    	    $("#randCode").val("");					
+			}
+			
+			//成功验证验证码
+			function checkForGuideSuccess(data){
+				console.log("checkForGuideSuccess.进入--->");
+				console.log("checkForGuideSuccess.JSON.stringify(data)--->" + JSON.stringify(data.data.result));
+//				console.log("@@@@@@@@@@@@@@@@@@@@@@");
+				ajax_trainQuery({   //正晚点查询
+					train_start_date : time ,//日期
+			        train_station_name : train_station.innerHTML, //车站
+			        randCode :  randCode.value,   //验证码
+				});
+			}
+			function trainQuerySuccess(data){
+				console.log("trainQuerySuccessSuccess.进入--->");
+				console.log("trainQuerySuccessSuccess.JSON.stringify(data)--->" + JSON.stringify(data.data.data));
+				if(data.data.flag==true&&data.data.data!=null){
+					mui.openWindow({
+						url: 'trainQuerydetail.html',
+						id: 'trainQuerydetail.html',
+						extras:{
+							data : data,
+						}
+					});
+				}else if(data.data.flag==false){
+					alert(data.data.message);
+				}
+				
+				
+			}
+		
+		</script>
+	</body>
+
+</html>

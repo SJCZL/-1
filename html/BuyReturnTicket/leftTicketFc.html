@@ -1,0 +1,158 @@
+<!doctype html>
+<html>
+
+	<head>
+		<meta charset="UTF-8">
+		<title></title>
+		<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+		<link href="../../css/mui.min.css" rel="stylesheet" />
+	</head>
+
+	<body>
+		<header class="mui-bar mui-bar-nav">
+		    <a class="mui-action-back mui-icon mui-icon-left-nav mui-pull-left"></a>
+		    <h1 class="mui-title">购买返程车票</h1>
+		</header>
+		<div class="mui-content">
+		    <ul class="mui-table-view">
+		    	 <li class="mui-table-view-cell" >
+		            <div class="mui-table" >
+						<div class="mui-table-cell mui-col-xs-2" >
+							<p style="font-size: 16px;">出发地：</p>	
+						</div>
+						<div  class="mui-table-cell mui-col-xs-2 " >
+							<p id="from_station" style="font-size: 16px;"></p>
+					   </div>
+					   <div class="mui-table-cell mui-col-xs-2">
+							<p style="font-size: 16px;">目的地：</p>	
+						</div>
+						<div  class="mui-table-cell mui-col-xs-2 " >
+							<p id="to_station" style="font-size: 16px;"></p>
+					   </div>
+					</div>        
+		        </li>
+		        <li class="mui-table-view-cell" >
+		        	<div >
+		        		<div class="mui-table" style="margin: 2% 0% 3% 0%;" >
+							<div class="mui-table-cell mui-col-xs-2">
+								<p style="font-size: 16px;">返程日期：</p>	
+							</div>
+							<div  class="mui-table-cell mui-col-xs-2 " style="">
+								<div style="margin-left: -50%">
+									<button id="date_time"  style="margin-top: -3%;margin-bottom: -3%;width: 60%;">
+										<!--<font style="font-size: 18px;">2016-06-14</font>
+										<img src="../../img/calendar.png" style="margin:-2% 0 -4% 10%; "/>-->
+									</button>
+								</div>
+						   </div>
+						</div>        
+		        	</div>
+		            
+		        </li>
+		    </ul>
+		    <div class="mui-content-padded" align="center">
+		        <button id="return_ticket" type="button" class="mui-btn mui-btn-blue">返程票查询</button>
+	        </div>
+		</div>
+		<script src="../../js/mui.min.js"></script>
+		<script type="text/javascript" src="../../js/date_time.js" ></script>
+		<script type="text/javascript" src="../../js/returnticket.js" ></script>
+		<script type="text/javascript">
+			mui.init();
+			
+			var dataResult;
+			
+			// Janine20170112:控件定义
+			var date_time;
+			var from_station;
+			var to_station;
+			var return_ticket;
+			
+			// Janine20170112:接收数据
+			var from_station_name;
+			var to_station_name;
+			var train_date;
+			var back_train_date;
+			var selfwebview;
+			var purpose_codes;
+			// Janine20170112:定义一个全局变量
+			var back_train_dateStr;
+			
+			/**
+			 * Janine20170112
+			 */
+			
+			mui.plusReady(function(){
+				
+				selfwebview = plus.webview.currentWebview();
+				purpose_codes = selfwebview.purpose_codes;
+				
+				from_station = document.getElementById('from_station');
+				to_station = document.getElementById('to_station');
+				date_time = document.getElementById('date_time');
+				return_ticket = document.getElementById('return_ticket');
+				
+				from_station_name = selfwebview.from_station_name;
+				to_station_name = selfwebview.to_station_name;
+				train_date = selfwebview.train_date;
+				back_train_date = selfwebview.back_train_date;
+				
+				from_station.innerHTML = to_station_name;
+				to_station.innerHTML = from_station_name;
+//				date_time.innerHTML = set_dateTime(train_date);
+				// Janine20170112:针对返回的返程日期，使用set_dateTime方法做修改
+				date_time.innerHTML = set_dateTime(back_train_date);
+				back_train_dateStr = back_train_date;
+				
+				date_time.addEventListener('tap', function() {
+					localStorage.setItem("leftTicketFc_flag","true");
+					mui.openWindow({
+						url: '../calendar.html',
+						id: '../calendar.html',
+						extras:{
+							data : "BuyReturnTicket/leftTicketFc.html",
+						}
+				   });
+				});
+				
+				window.addEventListener('getclock',function(e){
+					console.log(e.detail.time);
+					if(typeof(e.detail.time)!="undefined"){
+		                date_time.innerHTML=set_dateTime(e.detail.time);
+		                back_train_dateStr = e.detail.time;
+		                
+		            }
+				});
+				
+				return_ticket.addEventListener('tap', function() {
+					console.log("Janine20170112.purpose_codes:" + purpose_codes);
+					mui.openWindow({
+						url: '../trainResultShow_main.html',
+						id: '../trainResultShow_main.html',
+						extras:{
+							from_station : from_station_name,
+							to_station : to_station_name,
+							back_train_date : back_train_dateStr,    // Janine20170113
+							train_date : train_date,
+							tour_flag : 'fc',
+							purpose_codes : purpose_codes
+						}
+				   });
+				});
+				
+			})
+			
+			function set_dateTime(data){
+				back_train_date = data;
+				console.log(data);
+				console.log(back_train_date);
+				var list = '';
+				list = list+  '<font style="font-size: 18px;">'+data+'</font>'+
+							'<img src="../../img/calendar.png" style="margin:-2% 0 -4% 10%; "/>';
+				return list;
+			}
+			
+		</script>
+	</body>
+
+</html>

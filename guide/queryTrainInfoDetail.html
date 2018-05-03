@@ -1,0 +1,156 @@
+<!doctype html>
+<html>
+
+	<head>
+		<meta charset="UTF-8">
+		<title></title>
+		<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+		<link href="../css/mui.min.css" rel="stylesheet" />
+	</head>
+        <header class="mui-bar mui-bar-nav">
+            <a class="mui-action-back mui-icon mui-icon-left-nav mui-pull-left"></a>
+            <h1 class="mui-title">车次查询详情</h1>
+        </header>
+        <div class="mui-content">
+        	<div id="top_list" style="margin-top: 2%;margin-bottom: 2%;">
+        		<!--<div>G1次列车(高速 有空调)，全程共有3个停靠站</div>
+	        	<div class="mui-table" style="margin-top: 2%;">
+				    <div  class="mui-table-cell mui-col-xs-2 ">
+						<div >始发站：北京南</div>
+					</div>
+					<div  class="mui-table-cell mui-col-xs-2 ">
+						<div style="margin-left:-23% ;">终点站：上海虹桥</div>
+					</div>
+				</div>  -->
+        	</div>
+        	
+            <ul id="TrainInfo_list" class="mui-table-view" >
+                <!--<li class="mui-table-view-cell">
+                   <div class="mui-table">
+						<div  class="mui-table-cell mui-col-xs-2 ">
+							<div style="margin-left: ;">站序：1</div>
+						</div>
+						<div  class="mui-table-cell mui-col-xs-2 ">
+							<div style="margin-left: 15%;margin-right: -25%;">车站：北京南</div>
+						</div>
+						<div  class="mui-table-cell mui-col-xs-2 ">
+							<div style="margin-left: 25%;margin-right: -30%;">车次：G1</div>
+						</div>
+					</div>
+					<div class="mui-table">
+						<div  class="mui-table-cell mui-col-xs-2 ">
+							<div style="margin-left: -5%;">出发时间：09:00</div>
+						</div>
+						<div  class="mui-table-cell mui-col-xs-2 ">
+							<div style="margin-left: -23%;">到达时间：12:39</div>
+						</div>
+					</div> 
+					<div class="mui-table">
+						<div  class="mui-table-cell mui-col-xs-2 ">
+							<div style="margin-left: ;">历时：09:00</div>
+						</div>
+						<div  class="mui-table-cell mui-col-xs-2 ">
+							<div style="margin-left:-23% ;">当日到达</div>
+						</div>
+					</div>  
+                </li>      -->
+            </ul>
+        </div>
+	<body>
+		<script src="../js/mui.min.js"></script>
+		<script type="text/javascript">
+			mui.init({
+//				gestureConfig: {
+//					doubletap: true
+//				},
+//				swipeBack: true,
+				beforeback: function(){
+					// 获得列表界面的webview
+					var list  = plus.webview.getWebviewById('template-main.html');   
+					// 触发前往页面的自定义事件（例：AddNew）,从而进行数据刷新
+					mui.fire(list ,'refresh',{
+						address_id:"template-sub.html",
+						title:"车次查询",
+					});
+					// 返回true，继续页面关闭逻辑
+					return true;
+				},
+			});
+			var self;
+			var TrainInfo_data;
+			var dataItem;
+			var top_list;
+			var TrainInfo_list;
+			mui.plusReady(function(){
+				self = plus.webview.currentWebview(); //获取当前页面
+				 //接收上一个页面传送过来的数据
+				TrainInfo_data=self.data;
+				
+				//填充头部的数据
+				top_list=document.getElementById("top_list");
+				set_toplist();
+				
+				//车站详细列表的详情
+				TrainInfo_list=document.getElementById("TrainInfo_list");
+				set_TrainInfo_list();
+			});
+			
+			function set_toplist(){
+				dataItem=TrainInfo_data.data.data;
+				var list='';
+				var length=dataItem.length;
+			    
+				list=list + '<div>'+dataItem[0].station_train_code+'次列车('+dataItem[0].train_class_name+'有空调)，全程共有'+length+'个停靠站</div>'+
+				        	'<div class="mui-table" style="margin-top: 2%;">'+
+							    '<div  class="mui-table-cell mui-col-xs-2 ">'+
+									'<div >始发站：'+dataItem[0].start_station_name+'</div>'+
+								'</div>'+
+								'<div  class="mui-table-cell mui-col-xs-2 ">'+
+									'<div style="margin-left:-23% ;">终点站：'+dataItem[0].end_station_name+'</div>'+
+								'</div>'+
+							'</div>';
+				top_list.innerHTML=list;
+			}
+		    
+		    function set_TrainInfo_list(){
+		    	var list='';
+		    	var length=dataItem.length;
+		    	var j=0;
+		    	for(var i=0;i<length;i++){
+		    		j=i+1;
+		    		list=list+  '<li class="mui-table-view-cell">'+
+				                   '<div class="mui-table">'+
+										'<div  class="mui-table-cell mui-col-xs-2 ">'+
+											'<div style="margin-left: ;">站序：'+j+'</div>'+
+										'</div>'+
+										'<div  class="mui-table-cell mui-col-xs-2 ">'+
+											'<div style="margin-left: 15%;margin-right: -25%;">车站：'+dataItem[i].station_name+'</div>'+
+										'</div>'+
+										'<div  class="mui-table-cell mui-col-xs-2 ">'+
+											'<div style="margin-left: 25%;margin-right: -30%;">车次：'+dataItem[i].station_train_code+'</div>'+
+										'</div>'+
+									'</div>'+
+									'<div class="mui-table">'+
+										'<div  class="mui-table-cell mui-col-xs-2 ">'+
+											'<div style="margin-left:-5% ;">出发时间：'+dataItem[i].start_time+'</div>'+
+										'</div>'+
+										'<div  class="mui-table-cell mui-col-xs-2 ">'+
+											'<div style="margin-left: -23%;">到达时间：'+dataItem[i].arrive_time+'</div>'+
+										'</div>'+
+									'</div>' +
+									'<div class="mui-table">'+
+										'<div  class="mui-table-cell mui-col-xs-2 ">'+
+											'<div style="margin-left: ;">历时：'+dataItem[i].running_time+'</div>'+
+										'</div>'+
+										'<div  class="mui-table-cell mui-col-xs-2 ">'+
+											'<div style="margin-left:-23% ;">'+dataItem[i].arrive_day_str+'</div>'+
+										'</div>'+
+									'</div> '+ 
+				                '</li>';
+		    	}
+		    	TrainInfo_list.innerHTML=list;
+		    }
+		</script>
+	</body>
+
+</html>

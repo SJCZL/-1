@@ -1,0 +1,47 @@
+<!doctype html>
+<html>
+
+	<head>
+		<meta charset="UTF-8">
+		<title></title>
+		<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+		<link href="../css/mui.min.css" rel="stylesheet" />
+	</head>
+
+	<body >
+		<header class="mui-bar mui-bar-nav">
+			<a class="mui-action-back mui-icon mui-icon-left-nav mui-pull-left"></a>
+		    <h1 class="mui-title">确认支付</h1>
+		</header>
+		<div class="mui-content" id="payWebBusinessContent">
+			<div class="wait1">
+  				<div class="w1_1"><!-- <img src="pages/web/img/loading.gif" /> -->&nbsp;</div>
+  				<div class="w1_3">正在转向中，请稍候…</div>
+			</div>
+			<div class="wait1">
+  				<div class="w1_8">如果系统长时间无响应，请<a href="javascript:document.getElementsByName('myform')[0].submit();">单击此处</a>提交本页面</div>
+			</div>
+		</div>
+		
+		<script src="../js/mui.min.js"></script>
+		<script type="text/javascript" src="../js/ajax.js" ></script>
+		<script type="text/javascript">
+			mui.init();
+			var selfWebView;
+			var payWebBusinessContent;
+			var webBusinessData;
+			var myform;
+			
+			mui.plusReady(function() {
+				//alert("Janine:进入支付页面");//20170104
+				selfWebView = plus.webview.currentWebview();                              // 获取当前页面
+				payWebBusinessContent = document.getElementById('payWebBusinessContent');
+				console.log("Janine:webBusinessSuccess.接收到的数据--->" + selfWebView.webBusinessData);
+				webBusinessData = selfWebView.webBusinessData;
+				payWebBusinessContent.innerHTML = webBusinessData;
+				myform = document.getElementsByName('myform')[0].submit();
+			});
+		</script>
+	</body>
+
+</html>

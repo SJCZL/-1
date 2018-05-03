@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html>
+
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+		<title></title>
+		<script src="../js/mui.min.js"></script>
+		<script src="../js/record.js"></script>
+		<link href="../css/mui.min.css" rel="stylesheet" />
+		<link href="../css/appStyle.css" rel="stylesheet" />
+	</head>
+
+	<body>
+		<!--直接使用中间的mbody，即content，加载内容-->
+		<div class="mui-content">
+			<ul class="mui-table-view  mui-table-view-striped mui-table-view-condensed">
+				<li class="mui-table-view-cell">
+					<div class="mui-table">
+						<div class="mui-table-cell mui-text-center">
+							<p>
+								<div style="padding-top:15%;">
+									<font id="from_Station" color="#c6c6c6">出发站</font>
+								</div>
+							</p>
+							<a id="fromtag" class='mui-ellipsis'>
+								<div style="padding-top: 25%;">
+									<font id="fromStation" class="station">合肥</font>
+								</div>
+							</a>
+						</div>
+						<div class="mui-table-cell mui-text-center">
+							<br />
+							<img id='transform' src="../img/arrow01.png">
+						</div>
+						<div class="mui-table-cell mui-text-center">
+							<p>
+								<div style="padding-top:15%;">
+									<font id="to_Station" color="#c6c6c6">目的站</font>
+								</div>
+							</p>
+							<a id='totag' class='mui-ellipsis'>
+								<div style="padding-top: 25%;">
+									<font id="toStation" class="station">肥东</font>
+								</div>
+							</a>
+						</div>
+
+					</div>
+				</li>
+			</ul>
+			<ul class="mui-table-view">
+				<li class="mui-table-view-cell">
+					<a id="stationTime" class="mui-navigate-right">
+						<span style="color: #6f6f6f">出发时间</span>
+						<h5 id="showDate" class="mui-pull-right" style="padding-right: 40px;color: #000000;"></h5>
+					</a>
+				</li>
+			</ul>
+			<form class="mui-input-group">
+				<ul class="mui-table-view mui-table-view-chevron">
+					<li class="mui-table-view-cell" style="color: #6f6f6f">
+						学生票
+						<!--开关关闭状态-->
+						<div id="switchBtn" class="mui-switch">
+							<div class="mui-switch-handle"></div>
+						</div>
+					</li>
+				</ul>
+			</form>
+			
+			<!--赵双-->
+			
+			<form   class="mui-input-group" >
+				<ul class="mui-table-view">
+					<li class="mui-table-view-cell">
+						<div class="mui-input-row mui-radio mui-left mui-pull-right" style=" width: 50%;">
+							<label style="padding-left: 30%;">&nbsp;&nbsp;&nbsp;往返</label>
+							<input name="type_button" type="radio" value="wc"  />
+						</div>
+						<div class="mui-input-row mui-radio mui-left mui-pull-right" style="width: 50%;">
+							<label style="padding-left: 30%;">&nbsp;&nbsp;&nbsp;单程</label>
+							<input name="type_button" type="radio" value="dc"  checked/>
+						</div>
+					</li>
+				</ul>
+			</form>
+			
+			<!--赵双-->
+			
+			
+			<div class="mui-content-padded" align="center">
+				<!--
+                	
+                	描述：mui-btn-blue这个class样式是蓝底白字
+                -->
+				<button id="queryButton" type="button" class="mui-btn mui-btn-blue">查询</button>
+			</div>
+			<!--
+            	
+            	描述：历史记录
+            -->
+			<div class="history_record">
+				<span>历史记录</span>
+
+			</div>
+			<!--
+            	
+            	描述：流布局实现历史记录显示
+            	
+            -->
+			<div id="main">
+				<!--<div class="box">
+					<div id="record" class="record">
+						<font id="record">合肥-合肥东</font>
+					</div>
+				</div>
+				<div class="box">
+					<div class="record">
+					<font>乌鲁木齐南-上海虹桥</font>
+					</div>
+				</div>
+				<div class="box">
+					<div class="record">
+					<font>北京-上海</font>
+				</div>-->
+				
+			</div>
+		</div>
+		</div>
+		<script type="text/javascript" charset="UTF-8">
+			(function($, doc) {
+				// 定义变量
+				var showDate;              // 显示出发时的时间
+				var now;
+				var today;                 // 今天的日期
+				var show_date;             //接收回传过来的值
+				var station_name;
+				
+				var select_type;
+				
+				$.init({
+					statusBarBackground: '#f7f7f7'
+				});
+				$.plusReady(function() {
+					showDate = document.getElementById('showDate');  // 显示当前日期
+					now = new Date();     // 当前日期
+					if((now.getMonth() + 1) < 10){
+						if(now.getDate()<10){
+							today = now.getFullYear() + '-' +'0' + (now.getMonth() + 1) + '-' +'0' + now.getDate();// 当前日期
+						}else{
+							today = now.getFullYear() + '-' +'0' + (now.getMonth() + 1) + '-' + now.getDate();// 当前日期
+						}
+						
+					}else{
+						if(now.getDate()<10){
+							today = now.getFullYear() + '-' + (now.getMonth() + 1) + '-' +'0' + now.getDate();// 当前日期
+						}else{
+							today = now.getFullYear() + '-' + (now.getMonth() + 1) + '-' + now.getDate();// 当前日期
+						}
+						
+					}
+	              
+	                show_date = today;
+	                showDate.innerHTML = show_date;
+	                
+	                
+	                // 接收信号为getclock的时间传值
+	                window.addEventListener('getclock',function(e){
+						console.log(e.detail.time);
+					    if(typeof(e.detail.time) != undefined){  // 如果在选择时间时，没有点击任何时间值，则返回的值为空
+		                	showDate.innerHTML=e.detail.time;
+		                }	
+					});
+					
+					// 接收信号为fromtag的station传值
+					window.addEventListener('fromtag',function(e){
+						console.log(e.detail.station_name);
+					    if(typeof e.detail.station_name != undefined){  // 如果在选择车站时，没有点击任何时间值，则返回的值为空
+		                	fromStation.innerHTML=e.detail.station_name;
+		                }	
+					});
+					
+					// 接收信号为totag的station传值
+					window.addEventListener('totag',function(e){ 
+						console.log(e.detail.station_name);
+					    if(typeof(e.detail.station_name) != undefined ){  // 如果在选择车站时，没有点击任何时间值，则返回的值为空
+		                	toStation.innerHTML=e.detail.station_name;
+		                }	
+					});
+                    
+					/*
+					 * 退出的方法
+					 */
+					var backButtonPress = 0;
+					$.back = function(event) {
+						backButtonPress++;
+						if (backButtonPress > 1) {
+							plus.runtime.quit();
+						} else {
+							plus.nativeUI.toast('再按一次退出应用');
+						}
+						setTimeout(function() {
+							backButtonPress = 0;
+						}, 1000);
+						return false;
+					};
+				});
+				
+				
+			}(mui, document));
+		</script>
+	</body>
+
+</html>

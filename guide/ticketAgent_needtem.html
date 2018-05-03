@@ -1,0 +1,218 @@
+<!doctype html>
+<html>
+
+	<head>
+		<meta charset="UTF-8">
+		<title></title>
+		<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+		<link href="../css/mui.min.css" rel="stylesheet" />
+		<script src="../js/mui.min.js"></script>	
+		<style type="text/css">
+			.mui-btn {
+				width: 100%;
+				height:50px;
+				font-size: 25px;
+			}
+		</style>
+	</head>
+
+	<body>
+		<!--<header class="mui-bar mui-bar-nav">
+		    <h1 class="mui-title">请选择所在地区</h1>
+		</header>-->
+		<div class="mui-content">
+			<div class="mui-card">
+				<ul class="mui-table-view">
+					<li class="mui-table-view-cell mui-collapse ">  
+						<a  id="chineseName" class="mui-navigate-right" href="#" >请选择省</a>
+						
+						<ul id="add_chineseName" class="mui-table-view mui-collapse-content">
+							<!--<li class="mui-table-view-cell">
+							       <div class="mui-table">
+										<a href="#">
+											<div class="mui-table-cell mui-col-xs-2 ">
+												<p>安徽省</p>
+											</div>
+											
+										</a>
+									</div>
+							</li>       -->
+						</ul>
+						
+					</li>
+					<li class="mui-table-view-cell mui-collapse">
+						<a class="mui-navigate-right" href="#" id="city">请选择市</a>
+						<div class="mui-collapse-content" id="add_city">
+							
+						</div>
+					</li>
+					<li class="mui-table-view-cell mui-collapse">
+						<a class="mui-navigate-right" href="#" id="a_rea">请选择区/县</a>
+						<div class="mui-collapse-content" id="add_area">
+							
+						</div>
+					</li>
+				</ul>
+			</div>
+			<div class="mui-content-padded" align="center">
+		        <button id="Select" type="button" class="mui-btn mui-btn-blue " >查询</button>
+	        </div>
+		</div>
+		<script src="../js/guide.js" charset="UTF-8"></script>
+		<script type="text/javascript">
+			mui.init({
+				swipeBack:true //启用右滑关闭功能
+			})
+			var chineseName;
+			var add_chineseName;
+			var city;
+			var add_city;
+			var a_rea;
+			var add_area;
+			var province_data=[];
+			var city_data=[];
+			var County_data=[];
+			var province;
+			var city_name;
+			var County;
+			mui.plusReady(function(){
+	      		chineseName=document.getElementById('chineseName');
+				add_chineseName=document.getElementById('add_chineseName'); 
+				city=document.getElementById('city');
+				add_city=document.getElementById('add_city');
+				a_rea=document.getElementById('a_rea');
+				add_area=document.getElementById('add_area');
+				
+				//点击申请省的数据
+				chineseName.addEventListener('tap', function() {
+					ajax_queryProvince({}); //从12306获取省的名称		
+				});
+				//选择省点击事件
+				mui('#add_chineseName').on('tap', 'li', function() {
+					province = province_data[this.getAttribute('data-id')].chineseName; 
+					console.log(province);
+					chineseName.innerHTML=province;
+//					add_chineseName.innerHTML="";
+//					mui('#chineseName').popover('hide',add_chineseName);
+				});
+				
+				//根据选择的省，点击申请市的数据
+				city.addEventListener('tap', function() {
+					ajax_queryCity({
+						province:province
+					}); //从12306获取市的名称
+				}); 
+			    //选择市点击事件
+				mui('#add_city').on('tap', 'li', function() {
+					city_name = city_data[this.getAttribute('data-id')][0];
+					console.log("***"+typeof city_data[this.getAttribute('data-id')]);
+					console.log(city_name);
+					console.log("city_name"+typeof city_name);
+					city.innerHTML=city_name;
+				});
+				
+				//根据选择的省和市，点击申请区的数据
+				a_rea.addEventListener('tap', function() {
+					ajax_queryCounty({
+						province:province,
+						city_name : city_name
+					}); //从12306获取市的名称
+				}); 
+			    //选择区点击事件
+				mui('#add_area').on('tap', 'li', function() {
+					County= County_data[this.getAttribute('data-id')]; 
+					console.log(County);
+					a_rea.innerHTML=County;
+				});
+				
+				var Select=document.getElementById('Select');
+				Select.addEventListener('tap', function() {
+					ajax_queryAgency({
+						province:province,
+						city_name : city_name,
+						county:County
+					}); 					
+				}); 
+			    
+			});
+			
+			function queryProvinceSuccess(data) {//获取省成功
+				console.log("queryProvinceSuccess.进入--->");
+				console.log("queryProvinceSuccess.JSON.stringify(data)--->" + JSON.stringify(data.data));
+				province_data=data.data;
+				set_Province();
+			}															
+			function set_Province(){  //填充省
+				add_chineseName.innerHTML=' ';
+				var length=province_data.length
+				var Province='';
+				for(var i = 0;i <length;i++){
+//					console.log(i);
+					Province=Province+ '<li data-id="' + i + '" class="mui-table-view-cell"><div class="mui-table"> <a href="href="javascript:;"> <div class="mui-table-cell mui-col-xs-2 "> <p>'
+					               +province_data[i].chineseName+'</p></div></a></div></li>' ;
+					add_chineseName.innerHTML =Province;
+				}
+			}
+			
+			function queryCitySuccess(data) {
+				console.log("queryCitySuccess.进入--->");
+				console.log("queryCitySuccess.JSON.stringify(data)--->" + JSON.stringify(data.data));
+				city_data=data.data;
+				set_city();
+			}
+			function set_city(){  //填充市
+				add_city.innerHTML=' ';
+				var length=city_data.length
+				var city='';
+				for(var i = 0;i <length;i++){
+//					console.log(i);
+					city=city+ '<li data-id="' + i + '" class="mui-table-view-cell"><div class="mui-table"> <a href="href="javascript:;"> <div class="mui-table-cell mui-col-xs-2 "> <p>'
+					               +city_data[i]+'</p></div></a></div></li>' ;
+					add_city.innerHTML =city;
+				}
+			}
+			
+			function queryCountySuccess(data) {
+				console.log("queryCountySuccess.进入--->");
+//				console.log("queryCountySuccess.JSON.stringify(data)--->" + JSON.stringify(data.data));
+				console.log(data.data[0][0]);
+				if(data.data[0][0]== "" || data.data[0][0] == undefined || data.data[0][0] == null) {
+					alert("该市没有区/县");
+					County="";
+				}
+				console.log(County);
+				County_data=data.data;
+				set_County();
+			}
+			function set_County(){  //填充区
+				add_area.innerHTML=' ';
+				var length=County_data.length
+				var are_a='';
+				for(var i = 0;i <length;i++){
+//					console.log(i);
+					are_a=are_a+ '<li data-id="' + i + '" class="mui-table-view-cell"><div class="mui-table"> <a href="href="javascript:;"> <div class="mui-table-cell mui-col-xs-2 "> <p>'
+					               +County_data[i]+'</p></div></a></div></li>' ;
+					add_area.innerHTML =are_a;
+				}
+			}
+			
+			function queryAgencySuccess(data) {
+				var Agency_data=data.data.datas
+				console.log("queryAgencySuccess.进入--->");
+				console.log("queryAgencySuccess.JSON.stringify(data)--->" + JSON.stringify( Agency_data));
+				 console.log(County);
+				mui.openWindow({
+					url: 'ticketAgentdetail.html',
+					id: 'ticketAgentdetail.html',
+					extras:{
+						Agency_data : Agency_data,
+						province    : province,
+						city_name   : city_name,
+						county      : County,
+					}
+				});
+			}
+		</script>
+	</body>
+
+</html>

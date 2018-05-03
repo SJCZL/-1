@@ -1,0 +1,193 @@
+<!doctype html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<title></title>
+		<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+		<link href="../../css/mui.min.css" rel="stylesheet" />
+	</head>
+
+	<body>
+		<header class="mui-bar mui-bar-nav">
+		    <a class="mui-action-back mui-icon mui-icon-left-nav mui-pull-left"></a>
+		    <h1 class="mui-title">历史订单</h1>
+		</header>
+		<div class="mui-content">
+			<div class="mui-table" style="font-size: 16px; margin-top: 8px; margin-bottom: 4px;">
+		    	<div id="HistoryOrders_num"  class="mui-table-cell mui-col-xs-2 ">
+					<!--查询结果(4)-->
+				</div>
+		    </div>
+		    <ul id="HistoryOrdersList" class="mui-table-view">
+		        <!--<li class="mui-table-view-cell">
+		        	<div class="mui-table" style="font-size: 14px;">
+						<div class="mui-table-cell mui-col-xs-2 ">
+							订 &nbsp;单 &nbsp;号：
+						</div>
+					</div>  -->
+		            <!--<div class="mui-table" style="font-size: 14px;">
+						<div  class="mui-table-cell mui-col-xs-2 ">
+							<p id="date">2016-07-31</p>
+						</div>
+						<div class="mui-table-cell mui-col-xs-2 mui-text-center ">
+							<p id="time" style="margin-left: -30%;">08:52&nbsp;&nbsp;&nbsp;&nbsp;08:52</p>
+						</div>
+						<div  class="mui-table-cell mui-col-xs-2 mui-text-right ">
+							<p id="from_to_station" style="margin-left: -55%;">合肥&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;肥东</p>
+						</div>
+					</div>-->
+					
+					<!--<div class="mui-table" style="font-size: 14px; margin-top:8px ">
+						<div class="mui-table-cell mui-col-xs-2 ">
+							<p id="passenger_name">张三</p>
+						</div>
+						<div class="mui-table-cell mui-col-xs-2 mui-text-center ">
+							<p id="passenger_no_name" style="margin-left: -5%;">35621445624556226222</p>
+						</div>
+						<div class="mui-table-cell mui-col-xs-2 mui-text-right" >
+							<div style="margin-left: 0%;">
+								<p id="ticket_type_name">成人票</p>
+							</div>
+						</div>
+					</div>-->
+					
+					<!--<div class="mui-table" style="font-size: 14px; margin-top:8px ;">
+						<div  class="mui-table-cell mui-col-xs-2 ">
+							<p id="station_train_code">G7224</p>
+						</div>
+						<div class="mui-table-cell mui-col-xs-2 mui-text-center ">
+							<p id="seat_type_name" style="margin-left: -5%;">二等座</p>
+						</div>
+						<div class="mui-table-cell mui-col-xs-2 mui-text-right ">
+							<p id="seat_number" style="margin-left: -30%;">08车01A号</p>
+						</div>
+					</div> -->
+					
+					<!--<div class="mui-table" style="font-size: 14px; margin-top:8px ">
+						<div class="mui-table-cell mui-col-xs-2 ">
+							<p>车票状态：已退票</p>
+						</div>
+						<div class="mui-table-cell mui-col-xs-2 mui-text-right" >
+							<div style="margin-left: -30%">
+								<p id="ticket_price">14.50元</p></div>
+						</div>
+					</div>
+		        </li>      -->
+		    </ul>
+		    <span id='progressbar' class="mui-spinner" style="position: absolute;left: 45%;top:250px;"></span>
+		</div>
+		<script src="../../js/mui.min.js"></script>
+		<script type="text/javascript" src="../../js/ajax.js" ></script>
+		<script type="text/javascript" src="../../js/jquery-1.8.3.min.js"></script>
+		<script type="text/javascript">
+			mui.init();
+			
+			// 定义控件
+			var selfWebView;                  // 获取当前页面
+			var HistoryOrdersList;            // ul标签
+			var HistoryOrders_num;            // 订单数
+			var progressbar;
+			
+			var dataItem;
+			
+			// 定义上一界面的数据
+			var start_time;
+			var	end_time;
+			var	sequeue_train_name;
+			
+			mui.plusReady(function(){
+				
+				// 获取当前页面
+				selfWebView = plus.webview.currentWebview();                         
+				
+				// 赋值
+				start_time = selfWebView.start_time;
+				end_time = selfWebView.end_time;
+				sequeue_train_name = selfWebView.sequeue_train_name;
+				
+				// 历史订单
+				// Janine:未完成订单和历史订单，只有query_where不一样，未完成是G，历史是H
+				ajax_finishedOrder_H({
+					start_time : start_time,
+					end_time : end_time,
+					sequeue_train_name : sequeue_train_name,
+				});
+				
+				HistoryOrdersList = document.getElementById('HistoryOrdersList');        // ul标签获取
+				HistoryOrders_num =document.getElementById('HistoryOrders_num');
+				progressbar = document.getElementById('progressbar');
+			});
+			
+			// 填充数据
+			function finishedOrder_HSuccess(data){
+				console.log("Janine:finishedOrder_HSuccess.进入--->");
+				progressbar.style.display = 'none';
+				dataItem = data.result;         // 获取有效数据
+				if(dataItem !=""){
+					if(dataItem.data.order_total_number !='' && dataItem.data.order_total_number !=null){
+						HistoryOrders_num.innerHTML = "查询结果(" + dataItem.data.order_total_number + ")";
+					}else{
+						HistoryOrders_num.innerHTML = "查询结果(" + 0 + ")";
+					}
+					
+					var finallist ='';
+				
+					for(var i = 0; i < dataItem.data.OrderDTODataList.length; i++){
+					
+						console.log("Janine:finishedOrder_HSuccess.进入for--->");
+						orderDBLists = dataItem.data.OrderDTODataList[i];
+					
+						for(var j = 0; j < orderDBLists.tickets.length; j++){
+					
+						finallist = finallist + '<li class="mui-table-view-cell"><div class="mui-table" style="font-size: 14px;">'
+										+ '<div class="mui-table-cell mui-col-xs-2">'
+										+ "订" + '&nbsp;' + "单" + '&nbsp;'+ "号:" + orderDBLists.sequence_no
+						    			+ '</div></div><div class="mui-table" style="font-size: 14px;">'
+										+ '<div class="mui-table-cell mui-col-xs-2"><p id="date">'
+										+ orderDBLists.start_train_date_page.substr(0,10)
+										+ '</p></div><div class="mui-table-cell mui-col-xs-2 mui-text-center">'
+							            + '<p id="time" style="margin-left: -30%;">'
+							            + orderDBLists.start_time_page + '&nbsp;&nbsp;' + "-->" + '&nbsp;&nbsp;' 
+							            + orderDBLists.arrive_time_page
+							            + '</p></div><div class="mui-table-cell mui-col-xs-2 mui-text-right">'
+										+ '<p style="margin-left: -55%;">' 
+										+ orderDBLists.tickets[j].stationTrainDTO.from_station_name 
+										+ '&nbsp;&nbsp;&nbsp;' + "-->" + '&nbsp;&nbsp;&nbsp;'
+										+ orderDBLists.tickets[j].stationTrainDTO.to_station_name 
+										+ '</p></div></div><div class="mui-table" style="font-size:14px; margin-top:8px">'
+						                + '<div class="mui-table-cell mui-col-xs-2"><p id="passenger_name">'
+						                + orderDBLists.tickets[j].passengerDTO.passenger_name
+						                + '</p></div><div class="mui-table-cell mui-col-xs-2 mui-text-center">'
+										+ '<p style="margin-left: -5%;">'
+										+ orderDBLists.tickets[j].passengerDTO.passenger_id_no
+										+ '</p></div><div class="mui-table-cell mui-col-xs-2 mui-text-right">'
+										+ '<div style="margin-left: 0%;"><p>'
+										+ orderDBLists.tickets[j].ticket_type_name
+										+ '</p></div></div></div><div class="mui-table" style="font-size:14px; margin-top:8px;">'
+						                + '<div class="mui-table-cell mui-col-xs-2"><p id="station_train_code">'
+						                + orderDBLists.tickets[j].stationTrainDTO.station_train_code
+						                + '</p></div><div class="mui-table-cell mui-col-xs-2 mui-text-center">'
+										+ '<p style="margin-left: -5%;">'
+										+ orderDBLists.tickets[j].seat_type_name 
+										+ '</p></div><div class="mui-table-cell mui-col-xs-2 mui-text-right">'
+										+ '<p id="seat_number" style="margin-left: -30%;">'
+										+ orderDBLists.tickets[j].coach_name + "车厢"
+										+ orderDBLists.tickets[j].seat_name
+										+ '</p></div></div><div class="mui-table" style="font-size: 14px; margin-top:8px">'
+						    			+ '<div class="mui-table-cell mui-col-xs-2"><p>'
+						    			+ "车票状态:" + orderDBLists.tickets[j].ticket_status_name
+						    			+ '</p></div><div class="mui-table-cell mui-col-xs-2 mui-text-right">'
+										+ '<div style="margin-left: -30%"><p>'
+										+ orderDBLists.tickets[j].str_ticket_price_page + "元"
+										+ '</p></div></div></div></li>'; 		
+						}
+						HistoryOrdersList.innerHTML = finallist;
+					}
+				}else{
+					mui.toast("没查到历史记录！");
+				}
+			}	
+		</script>
+	</body>
+
+</html>

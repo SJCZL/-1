@@ -1,0 +1,445 @@
+<!doctype html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<title></title>
+		<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+		<link href="../../css/mui.min.css" rel="stylesheet" />
+	</head>
+
+	<body>
+		<header class="mui-bar mui-bar-nav">
+		    <a class="mui-action-back mui-icon mui-icon-left-nav mui-pull-left"></a>
+		    <h1 class="mui-title">订单详情</h1>
+		</header>
+		<div class="mui-content">
+		    <div class="mui-table" style="font-size: 16px; margin-top: 8px; margin-bottom: 4px; ">
+		    	<div id="order_num"  class="mui-table-cell mui-col-xs-2 " style="color: darkcyan;">
+					<!--E367295871-->
+				</div>
+				<div id="date_time"  class="mui-table-cell mui-col-xs-2 mui-text-right" >
+					<!--2016年7月7日-->
+				</div>
+		    </div>
+		    
+		    <ul class="mui-table-view" id="OrderDetailList">
+		        <li class="mui-table-view-cell">
+		            <div class="mui-table" style="font-size: 14px;">
+						<div  class="mui-table-cell mui-col-xs-2 ">
+							<p id="date">2016-07-31</p>
+						</div>
+						<div class="mui-table-cell mui-col-xs-2 mui-text-left ">
+							<p id="time" style="margin-left: -30%;">08:52开</p>
+						</div>
+						<div  class="mui-table-cell mui-col-xs-2 mui-text-left ">
+							<p id="from_to_station" style="margin-left: -55%;">合肥&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;肥东</p>
+						</div>
+					</div>  
+						
+					<div class="mui-table" style="font-size: 14px; margin-top:8px ;">
+						<div  class="mui-table-cell mui-col-xs-2 ">
+							<p id="station_train_code">G7224</p>
+						</div>
+						<div class="mui-table-cell mui-col-xs-2 mui-text-left ">
+							<p id="seat_type_name" style="margin-left: -5%;">二等座</p>
+						</div>
+						<div class="mui-table-cell mui-col-xs-2 mui-text-left ">
+							<p id="coach_name" style="margin-left: -5%;">08车</p>
+						</div>
+						<div class="mui-table-cell mui-col-xs-2 mui-text-left ">
+							<p id="seat_number" style="margin-left: -30%;">01A号</p>
+						</div>
+					</div> 
+					
+					<div class="mui-table" style="font-size: 14px; margin-top:8px ">
+						<div class="mui-table-cell mui-col-xs-2 ">
+							<p id="passenger_name">张三</p>
+						</div>
+						<div class="mui-table-cell mui-col-xs-2 mui-text-left ">
+							<p id="passenger_no_name" style="margin-left: -5%;">二代身份证</p>
+						</div>
+						<div class="mui-table-cell mui-col-xs-2 " >
+							<div style="margin-left: 0%;">
+								<p id="ticket_type_name">成人票</p>
+							</div>
+						</div>
+						<div class="mui-table-cell mui-col-xs-2 " >
+							<div style="margin-left: -30%">
+								<p id="ticket_price">14.50元</p></div>
+						</div>
+					</div>
+					
+					<div class="mui-table" style="font-size: 14px; margin-top:8px ">
+						<div class="mui-table-cell mui-col-xs-2 ">
+							<p>车票状态：已退票</p>
+						</div>
+					</div>
+					
+					<div class="mui-table" style="font-size: 14px; margin-top:8px ">
+						
+						<div class="mui-table-cell mui-col-xs-2 mui-text-left ">
+							<button type="button" class="mui-btn mui-btn-blue " style="margin-left : 0%;">退票</button>
+						</div>
+						<div class="mui-table-cell mui-col-xs-2 ">
+							<button class="mui-badge-blue">改签</button>
+						</div>
+						<div class="mui-table-cell mui-col-xs-2 ">
+							<button class="mui-badge-blue">变更到站</button>
+						</div>
+					</div>
+		        </li>      
+		    </ul>
+		    
+		</div>
+		
+		<script src="../../js/mui.min.js"></script>
+		<script type="text/javascript" src="../../js/ajax.js" ></script>
+		<script type="text/javascript" src="../../js/jquery-1.8.3.min.js" ></script>
+		<script type="text/javascript">
+			mui.init({
+				beforeback: function(){
+					// 获得列表界面的webview
+					var list  = plus.webview.getWebviewById('NoTravelOrdersDisplay.html');
+					// 触发前往页面的自定义事件（例：AddNew）,从而进行数据刷新
+					mui.fire(list ,'NoTravelOrdersDisplay');
+					// 返回true，继续页面关闭逻辑
+					return true;
+				},
+			});
+			
+			var selfWebView;                  // 获取当前页面
+			var OrderDTODataList;             // 订单数组
+			var OrderDetailList;              // ul标签
+			var orderNum;                     // 订单号
+			var dateTime;                     // 订票日期
+			
+			var submitStatus;
+			var dataItem;
+			
+			var purpose_codes;
+			
+			var sequence_no;
+			var batch_no;
+			var coach_no;
+	    	var seat_no;
+	    	var start_train_date_page;
+			var train_code;
+			var coach_name;
+			var seat_name;
+			var seat_type_name;
+			var from_station_name;
+			var to_station_name;
+			var start_time;
+			var passenger_name;
+			/*********************************************
+			 * 为什么总是先加载页面，后返回数据
+			 **********************************************/
+			mui.plusReady(function(){
+				
+				selfWebView = plus.webview.currentWebview();                         // 获取当前页面
+				OrderDTODataList = selfWebView.OrderDTODataList;                     // 订单数组
+				console.log("Janine:OrderDTODataList--->" + OrderDTODataList);
+				console.log("Janine:OrderDTODataList.sequence_no--->" 
+								+ OrderDTODataList.sequence_no);
+				OrderDetailList = document.getElementById('OrderDetailList');        // ul标签获取
+				orderNum = document.getElementById('order_num');                     // 订单号
+				dateTime = document.getElementById('date_time');                     // 订票日期
+				
+				dataLength = OrderDTODataList.tickets.length;                        // Janine:订单数据的长度
+				
+				unfinishedOrderDetail(OrderDTODataList,dataLength);      // 调用数据填充的方法
+				
+				/**
+				 * Janine:此处是退票按钮的点击事件
+				 */
+				mui('.bounce').on('tap','button',function(){
+					console.log("Janine:bounce.退票.点击事件--->");
+					console.log("Janine:bounceBtn.sequence_no:" + OrderDTODataList.tickets[this.getAttribute('data-id')].sequence_no);
+					
+					if(OrderDTODataList.tickets[this.getAttribute('data-id')].return_flag == 'Y'){
+						returnTicketAffirm(this.getAttribute('data-id'));
+					}
+					
+				});
+				
+				// Janine:N是“改签”,此处是改签按钮的点击事件
+				mui('.meal').on('tap','button',function(){
+					
+					console.log("Janine:meal.改签.点击事件--->");
+					if(OrderDTODataList.tickets[this.getAttribute('data-id')].resign_flag == "1"){
+						from_station_name = OrderDTODataList.tickets[this.getAttribute('data-id')].stationTrainDTO.from_station_name;
+						to_station_name = OrderDTODataList.tickets[this.getAttribute('data-id')].stationTrainDTO.to_station_name;
+   						train_date = OrderDTODataList.tickets[this.getAttribute('data-id')].start_train_date_page.substr(0,10);
+   						passenger_name = OrderDTODataList.tickets[this.getAttribute('data-id')].passengerDTO.passenger_name;
+   						passenger_id_no = OrderDTODataList.tickets[this.getAttribute('data-id')].passengerDTO.passenger_id_no;
+   						passenger_id_type_name = OrderDTODataList.tickets[this.getAttribute('data-id')].passengerDTO.passenger_id_type_name;
+   					
+   						var ticket_type_name = OrderDTODataList.tickets[this.getAttribute('data-id')].ticket_type_name;
+						if(ticket_type_name =="成人票"){
+							purpose_codes = "ADULT";
+						}
+					
+						console.log("Janine:meal.点击事件--->" + start_train_date_page+",");
+					
+						var ticketkeyStr = '';
+						// ticketkey组成结构:sequence_no,batch_no,coach_no,seat_no,start_train_date_page多张车票信息用#隔开，utf-8编码
+						var sequence_no = OrderDTODataList.tickets[this.getAttribute('data-id')].sequence_no;
+						var batch_no = OrderDTODataList.tickets[this.getAttribute('data-id')].batch_no;
+						var coach_no = OrderDTODataList.tickets[this.getAttribute('data-id')].coach_no;
+	    				var seat_no = OrderDTODataList.tickets[this.getAttribute('data-id')].seat_no;
+						var start_train_date_page = OrderDTODataList.tickets[this.getAttribute('data-id')].start_train_date_page;
+				
+						// 接口中需要的passengerTicketStr参数
+						var tStr = sequence_no + "," + batch_no + "," + coach_no + "," + seat_no + "," + start_train_date_page + "#";
+						console.log("Janine:tStr--->" + tStr);
+						ticketkeyStr += tStr;
+				
+						if(ticketkeyStr != "") {
+							ticketkeyStr = ticketkeyStr.substring(0, ticketkeyStr.length - 1);
+							console.log("Janine:ticketkey--->" + ticketkeyStr);
+						}
+						ajax_resginTicket({
+							sequence_no : OrderDTODataList.tickets[this.getAttribute('data-id')].sequence_no,
+							ticketkey : ticketkeyStr,        // 需要改签的车票信息
+							changeTSFlag : 'N'
+						});
+					}
+				});
+				
+				// Janine:Y是“变更到站”,此处是变更到站按钮的点击事件
+				mui('.change').on('tap','button',function(){
+					
+					console.log("Janine:change.变更到站点击事件--->");
+					if(OrderDTODataList.tickets[this.getAttribute('data-id')].resign_flag == "1"){
+						from_station_name = OrderDTODataList.tickets[this.getAttribute('data-id')].stationTrainDTO.from_station_name;
+						to_station_name = OrderDTODataList.tickets[this.getAttribute('data-id')].stationTrainDTO.to_station_name;
+   						train_date = OrderDTODataList.tickets[this.getAttribute('data-id')].start_train_date_page.substr(0,10);
+   						passenger_name = OrderDTODataList.tickets[this.getAttribute('data-id')].passengerDTO.passenger_name;
+   						passenger_id_no = OrderDTODataList.tickets[this.getAttribute('data-id')].passengerDTO.passenger_id_no;
+   						passenger_id_type_name = OrderDTODataList.tickets[this.getAttribute('data-id')].passengerDTO.passenger_id_type_name;
+   					
+   						var ticket_type_name = OrderDTODataList.tickets[this.getAttribute('data-id')].ticket_type_name;
+						if(ticket_type_name =="成人票"){
+							purpose_codes = "ADULT";
+						}
+					
+					console.log("Janine:meal.点击事件--->" + start_train_date_page+",");
+					
+					var ticketkeyStr = '';
+					// ticketkey组成结构:sequence_no,batch_no,coach_no,seat_no,start_train_date_page多张车票信息用#隔开，utf-8编码
+					var sequence_no = OrderDTODataList.tickets[this.getAttribute('data-id')].sequence_no;
+					var batch_no = OrderDTODataList.tickets[this.getAttribute('data-id')].batch_no;
+					var coach_no = OrderDTODataList.tickets[this.getAttribute('data-id')].coach_no;
+	    			var seat_no = OrderDTODataList.tickets[this.getAttribute('data-id')].seat_no;
+					var start_train_date_page = OrderDTODataList.tickets[this.getAttribute('data-id')].start_train_date_page;
+				
+					// 接口中需要的passengerTicketStr参数
+					var tStr = sequence_no + "," + batch_no + "," + coach_no + "," + seat_no + "," + start_train_date_page + "#";
+					console.log("Janine:tStr--->" + tStr);
+					ticketkeyStr += tStr;
+				
+					if(ticketkeyStr != "") {
+						ticketkeyStr = ticketkeyStr.substring(0, ticketkeyStr.length - 1);
+						console.log("Janine:ticketkey--->" + ticketkeyStr);
+					}
+					ajax_resginTicket({
+						sequence_no : OrderDTODataList.tickets[this.getAttribute('data-id')].sequence_no,
+						ticketkey : ticketkeyStr,        // 需要改签的车票信息
+						changeTSFlag : 'Y'
+					});
+					}
+				});
+			});
+			
+			/**
+			 * Janine:判断能否退票
+			 */
+			function returnTicketAffirm(i){
+				ajax_returnTicketAffirm({
+					sequence_no : OrderDTODataList.tickets[i].sequence_no,
+   					batch_no : OrderDTODataList.tickets[i].batch_no,
+   					coach_no : OrderDTODataList.tickets[i].coach_no,
+   					seat_no : OrderDTODataList.tickets[i].seat_no,
+   					start_train_date_page : OrderDTODataList.tickets[i].start_train_date_page,
+   					train_code : OrderDTODataList.tickets[i].stationTrainDTO.station_train_code,
+   					coach_name : OrderDTODataList.tickets[i].coach_name,
+   					seat_name : OrderDTODataList.tickets[i].seat_name,
+   					seat_type_name : OrderDTODataList.tickets[i].seat_type_name,
+   					train_date : OrderDTODataList.tickets[i].train_date,
+   					from_station_name : OrderDTODataList.tickets[i].stationTrainDTO.from_station_name,
+   					to_station_name : OrderDTODataList.tickets[i].stationTrainDTO.to_station_name,
+   					start_time : OrderDTODataList.tickets[i].stationTrainDTO.start_time,
+   					passenger_name : OrderDTODataList.tickets[i].passengerDTO.passenger_name,
+				});
+			}
+			
+			/**
+			 * Janine:判断出可以退票，如果可以进行退票操作
+			 * @param {Object} data
+			 */
+			function returnTicketAffirmSuccess(data){
+				dataItem = data.result;
+				if(dataItem.data.ticket_price == undefined || dataItem.data.ticket_price ==""){
+					mui.toast(dataItem.data.errMsg);
+				}else{
+					var msg = "您确定退款吗？\n";
+					msg += "共计退款 " + dataItem.data.amount/100 + "元\n";
+					msg += "车票票款：" + dataItem.data.ticket_price + "元\n";
+					msg += "退票费：" + dataItem.data.return_cost + "元\n";
+					msg += "应退票款：" + dataItem.data.return_price + "元\n";
+					if(dataItem.data.return_deliver_flag == "Y") {
+						msg += "应退快递票款：" + dataItem.data.deliver_fee_char/100 + "元\n";
+					}
+					if(dataItem.data.fee_char != "") {
+						msg += "应退保险费：" + dataItem.data.fee_char/100 + "元\n";
+					}
+					msg += "实际核收退票费及应退票款将按最终交易时间计算。";
+				
+					var btnArray = ['否', '是'];
+					mui.confirm(msg, '退款提示', btnArray, function(e) {
+						if (e.index == 1) {
+							console.log("点击了是!");
+							ajax_returnTicket({
+								sequence_no : dataItem.data.sequence_no
+							});
+						} else {
+							console.log("点击了否!");
+							alert("取消退票！");
+						}
+					});
+				}
+			}
+			
+			/**
+			 * Janine:判断可以改签
+			 * @param {Object} data
+			 */
+			function resginTicketSuccess(data){
+				console.log("Janine:meal.resginTicketSuccess.train_date--->" + train_date);
+				mui.openWindow({
+					url : '../MealAndChange/MealAndChange.html',
+					id : 'MealAndChange',
+					extras : {
+						// 查询时需要的四个参数
+						purpose_codes: purpose_codes,    		            // 成人票或者学生票
+						train_date : train_date,                            // 出发时间
+						from_station : from_station_name,                   // 车站名称
+						to_station : to_station_name,                       // 同上
+					
+					}
+				});
+			}
+			
+			// 填充数据
+			function unfinishedOrderDetail(data,length){
+				orderNum.innerHTML = data.sequence_no;
+				dateTime.innerHTML = data.order_date;
+				var finallist ='';
+				
+				for(var i = 0; i < length; i++){
+					
+					finallist = finallist + '<li class="mui-table-view-cell"><div class="mui-table" style="font-size: 14px;"><div class="mui-table-cell mui-col-xs-2"><p>'
+							+ data.tickets[i].start_train_date_page.substr(0,10)
+							+ '</p></div><div class="mui-table-cell mui-col-xs-2 mui-text-left"><p style="margin-left: -30%;">'
+							+ data.tickets[i].start_train_date_page.substr(10,data.tickets[i].start_train_date_page.length-1) + "开"
+							+ '</p></div><div class="mui-table-cell mui-col-xs-2 mui-text-left"><p style="margin-left: -55%;">'
+							+ data.tickets[i].stationTrainDTO.from_station_name + '&nbsp;&nbsp;&nbsp;' + "——" + '&nbsp;&nbsp;&nbsp;' 
+							+ data.tickets[i].stationTrainDTO.to_station_name
+							+ '</p></div></div><div class="mui-table" style="font-size: 14px; margin-top:8px;"><div class="mui-table-cell mui-col-xs-2">'
+							+ '<p>'
+							+ data.tickets[i].stationTrainDTO.station_train_code
+							+ '</p></div><div class="mui-table-cell mui-col-xs-3 mui-text-left "><p style="margin-left: -5%;">'
+							+ data.tickets[i].seat_type_name
+							+ '</p></div><div class="mui-table-cell mui-col-xs-2 mui-text-left"><p style="margin-left: -5%;">'
+							+ data.tickets[i].coach_name + "车" 
+							+ '</p></div><div class="mui-table-cell mui-col-xs-2 mui-text-left "><p style="margin-left: -30%;">'
+							+ data.tickets[i].seat_name 
+							+ '</p></div></div><div class="mui-table" style="font-size: 14px;margin-top:8px"><div class="mui-table-cell mui-col-xs-1">'
+							+ '<p id="passenger_name">'
+							+ data.tickets[i].passengerDTO.passenger_name
+							+ '</p></div><div class="mui-table-cell mui-col-xs-3 mui-text-left"><p style="margin-left: -5%;">'
+							+ data.tickets[i].passengerDTO.passenger_id_no
+							+ '</p></div><div class="mui-table-cell mui-col-xs-2"><div style="margin-left: 0%;"><p id="ticket_type_name">'
+							+ data.tickets[i].ticket_type_name
+							+ '</p></div></div><div class="mui-table-cell mui-col-xs-1"><div style="margin-left:-30%"><p id="ticket_price">'
+							+ data.tickets[i].ticket_price/100 + "元"
+							+ '</p></div></div></div><div class="mui-table" style="font-size: 14px; margin-top:8px">'
+							+ '<div class="mui-table-cell mui-col-xs-1"><p>'
+							+ "车票状态" + '&nbsp;' + ":" + '&nbsp;&nbsp;' + data.tickets[i].ticket_status_name
+							+ '</p></div></div>';
+							
+					if(data.tickets[i].return_flag == "Y"){
+						// Janine:如果return_flag==“Y”时,说明可以退票
+						if(data.tickets[i].resign_flag == "1"){
+							// Janine:resign_flag == "1"时，说明可以改签，也可以变更到站
+							finallist =	finallist + '<div class="mui-table" style="font-size: 14px; margin-top:8px">'
+								+ '<div class="mui-table-cell mui-col-xs-2 mui-text-left bounce">'
+							 	+ '<button type="button" data-id="'+ i + '" class="mui-btn mui-btn-blue" style="margin-left: 0%;">'
+							 	+ "退票" 
+							 	+ '</button></div>'
+							 		
+							 	+ '<div class="mui-table-cell mui-col-xs-2 meal">'
+								+ '<button data-id="'+ i + '" class="mui-btn mui-btn-blue">'
+								+ "改签"
+								+ '</button></div>'
+									
+								+ '<div class="mui-table-cell mui-col-xs-2 change">'
+								+ '<button data-id="'+ i + '" class="mui-btn mui-btn-blue">'
+								+ "变更到站"
+								+ '</button></div></div></li>';
+						}else{
+							// Janine:可以退票，不可以改签，也不可以变更到站
+							finallist =	finallist + '<div class="mui-table" style="font-size: 14px; margin-top:8px">'
+								+ '<div class="mui-table-cell mui-col-xs-2 mui-text-left bounce">'
+							 	+ '<button type="button" data-id="'+ i + '" class="mui-btn mui-btn-blue" style="margin-left: 0%;">'
+							 	+ "退票" 
+							 	+ '</button></div>'
+							 		
+							 	+ '<div class="mui-table-cell mui-col-xs-2 meal">'
+								+ '<button data-id="'+ i + '" class="mui-btn">'
+								+ "改签"
+								+ '</button></div>'
+									
+								+ '<div class="mui-table-cell mui-col-xs-2 change">'
+								+ '<button data-id="'+ i + '" class="mui-btn">'
+								+ "变更到站"
+								+ '</button></div></div></li>';
+						}
+						
+					}else{
+						finallist =	finallist + '<div class="mui-table" style="font-size: 14px; margin-top:8px">'
+							+ '<div class="mui-table-cell mui-col-xs-2 mui-text-left bounce">'
+							+ '<button type="button" data-id="'+ i + '" class="mui-btn" style="margin-left: 0%;">'
+							+ "退票" 
+							+ '</button></div>'
+							 		
+							+ '<div class="mui-table-cell mui-col-xs-2 meal">'
+							+ '<button data-id="'+ i + '" class="mui-btn">'
+							+ "改签"
+							+ '</button></div>'
+									
+							+ '<div class="mui-table-cell mui-col-xs-2 change">'
+							+ '<button data-id="'+ i + '" class="mui-btn">'
+							+ "变更到站"
+							+ '</button></div></div></li>';
+					}
+				}
+					OrderDetailList.innerHTML = finallist;
+			}
+			
+			// Janine:退票成功
+			function returnTicketSuccess(data){
+				var btnArray = ['留在本页', '前往查询'];
+				var msg = "友情提示\n";
+				mui.confirm(msg, '退票成功，请到未出行订单中查询', btnArray, function(e) {
+					if (e.index == 1) {
+						mui.openWindow({
+							url : 'NoTravelOrdersDetail.html',
+							id : 'NoTravelOrdersDetail'
+						});
+					} 
+				});
+			}
+		</script>
+	</body>
+</html>

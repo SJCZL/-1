@@ -1,0 +1,721 @@
+<!DOCTYPE html>
+<html>
+
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+		<title></title>
+
+		<link href="../css/mui.min.css" rel="stylesheet" />
+		<link href="../css/own.css" rel="stylesheet" />
+
+		<style type="text/css">
+			.touclick-wrapper {
+				background-color: #fff;
+				border: 2px solid #e3e1de;
+				margin: 8px;
+				position: relative;
+				width: 313px;
+			}
+			
+			.touclick-reload-normal {
+				background-position: 0 0;
+			}
+			
+			.touclick-reload {
+				cursor: pointer;
+				height: 25px;
+				left: 246px;
+				position: absolute;
+				top: 3px;
+				width: 54px;
+			}
+			
+			.touclick-hov {
+				background-position: 0 -96px;
+				font-size: 0;
+				height: 27px;
+				position: absolute;
+				width: 27px;
+			}
+			
+			.touclick-bgimg {
+				background-image: url("../img/captcha.png");
+			}
+			
+			.api_table tbody tr:hover {
+				background: none;
+			}
+			
+			.api_table td {
+				height: 40px;
+				line-height: 40px;
+				text-align: center;
+				background-color: #F5F5F5;
+			}
+			
+			.mui-btn {
+				width: 100%;
+			}
+			
+			.des {
+				margin: .5em 0;
+			}
+			
+			.des>li {
+				font-size: 14px;
+				color: #8f8f94;
+			}
+			
+			p {
+				color: white;
+			}
+			
+			.mui-icon-close-filled {
+				/*color: #C60B02;*/
+				/*color: #C60A00;*/
+				color: #CF2D28;
+				vertical-align: middle;
+				margin-top: 10px;
+			}
+			
+			.mui-icon-close-filled {
+				vertical-align: middle;
+			}
+		</style>
+	</head>
+
+	<body>
+		<header class="mui-bar mui-bar-nav">
+			<a class="mui-action-back mui-icon mui-icon-left-nav mui-pull-left"></a>
+			<h1 class="mui-title">填写订单</h1>
+		</header>
+
+		<nav class="mui-bar mui-bar-tab ">
+			<input type="hidden" name="randCode" id="randCode" value="">
+			<a class="mui-tab-item own-main-background-color" id="sure" style="color: white;">确认购票</a>
+		</nav>
+
+		<div class="mui-content">
+			<ul id="topList" class="mui-table-view" style="margin-top: 0px;">
+				<li class="mui-table-view-cell" style="background: #8fc8ff;">
+					<div class="mui-table">
+						<div class="mui-table-cell mui-col-xs-2 mui-text-right">
+							<p id="from_station_name" style="font-size: 20px;" ></p>
+							<p id="start_time" style=" margin-top: 15px;"></p>
+							<p id="train_date" style=" margin-top: 5px;"></p>
+						</div>
+						<div class="mui-table-cell mui-col-xs-2 mui-text-center">
+							<p id="station_train_code" style="font-size: 14px;color: white;" ></p>
+							<img src="../img/train.png" style="height: 40px;width: 80px;">
+							<p id="lishi" style="font-size: 12px;"></p>
+						</div>
+						<div class="mui-table-cell mui-col-xs-2">
+							<p id="to_station_name" style="font-size: 20px;"></p>
+							<p id="arrive_time" style=" margin-top: 15px;"></p>
+							<p id="end_train_date" style=" margin-top: 5px;"></p>
+						</div>
+					</div>
+				</li>
+			</ul>
+
+			<ul class="mui-table-view ">
+				<li class="mui-table-view-cell ">
+					<div id="seatTicketType" class="mui-table-cell mui-col-xs-2">
+						<!--二等座-->
+					</div>
+					<div id="seatTicketPrice" class="mui-table-cell mui-col-xs-2">
+						<!--￥6.5-->
+					</div>
+					<div id="seatTicketNum" class="mui-table-cell mui-col-xs-2">
+						<!--￥6.5-->
+					</div>
+				</li>
+			</ul>
+			<ul class="mui-table-view" id="passmessage">
+				<!--<li class="mui-table-view-cell" >
+		    			<div class="mui-table">	
+		      				<div class="mui-table-cell"  >
+		    					<span class="mui-icon mui-icon-close-filled" ></span>
+		      				</div>
+		     				<div class="mui-table-cell mui-col-xs-10 " style="padding-left: 5px;" >
+		        			<p>张三&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;成人票</p>
+		        			<p>身份证&nbsp;&nbsp;340xxxxxxxxxxxxxx</p>
+		     				</div>
+		    			</div>
+					</li>-->
+			</ul>
+
+			<div class="mui-content-padded" align="center">
+				<button id="add" type="button" class="mui-btn mui-icon mui-icon-plusempty mui-btn-blue">添加乘客</button>
+			</div>
+
+			<!--<div style="margin-top:10px;">
+				<div class="touclick-wrapper">
+					<div id="touclick" class="touclick-bgimg touclick-reload touclick-reload-normal"></div>
+					<img src="" id="captcha" onclick="getPos(this,event)">
+					<div id="touclick-list"></div>
+				</div>
+			</div>-->
+
+			<script src="../js/mui.min.js"></script>
+			<script src="../js/ajax.js" charset="UTF-8"></script>
+			<script type="text/javascript" src="../js/returnticket.js" ></script>
+			<script type="text/javascript" src="../js/jquery-1.11.1.js"></script>
+			<script type="text/javascript" charset="UTF-8">
+				mui.init();
+
+				var self;                  // 当前页面
+				var dataItem;
+				var checkpass;             //乘客信息
+				var gloaled;
+				var purpose_codes;
+				var tour_flag;
+				var key_check_isChange;
+                var leftTicketStr;
+                var train_location;
+                
+                // Janine2017011修改
+//              var FormStation;
+//              var ToStation;
+                
+                // Janine:接收上界面传来的值
+				var from_station_name;
+				var start_time;
+				var to_station_name;
+				var arrive_time;
+				var lishi;
+				var station_train_code;
+				var start_train_date;
+				var end_train_date;
+				var seatTicketType;
+			//	var seatTicketPrice;//20170105
+				var seatTicketNum;
+				
+				// 定义控件名
+				var Dfrom_station_name;
+				var Dstart_time;
+				var Dto_station_name;
+				var Darrive_time;
+				var Dlishi;
+				var Dstation_train_code;
+				var Dstart_train_date;
+				var Dend_train_date;
+				var DseatTicketType;
+				var DseatTicketPrice;
+				var DseatTicketNum;
+				var passmessage;
+				var addButton;              // 添加乘客人的按钮
+				var topList;
+				var sureButton;             // 确认购票
+				
+				//点击注册按钮时，添加响应事件
+				mui.plusReady(function() {
+					console.log("Janine:fillOrder.进入--->");
+					self = plus.webview.currentWebview(); // 获取当前页面
+					// 获取控件名，并赋值
+					Dfrom_station_name = document.getElementById('from_station_name');
+					Dstart_time = document.getElementById('start_time');
+					Dto_station_name = document.getElementById('to_station_name');
+					Darrive_time = document.getElementById('arrive_time');
+					Dstation_train_code = document.getElementById('station_train_code');
+					Dtrain_date = document.getElementById('train_date');
+					Dlishi = document.getElementById('lishi');
+					Dend_train_date = document.getElementById('end_train_date');
+					DseatTicketType = document.getElementById('seatTicketType');
+				//	DseatTicketPrice = document.getElementById('seatTicketPrice');//20170105
+					DseatTicketNum = document.getElementById('seatTicketNum');
+					addButton = document.getElementById('add');      // 获取添加乘客的控件
+					sureButton = document.getElementById('sure');    // 获取确认购票按钮
+					
+					// 得到从上一页面传来的信息，并赋值给需要的控件
+					gloaled = self.globaled;
+					key_check_isChange = self.key_check_isChange;        //（由步骤3.3获取）
+                	leftTicketStr = self.leftTicketStr;                  //（由步骤3.3获取）
+                	train_location = self.train_location;                //（由步骤3.3获取）
+                	
+
+                	
+                	tour_flag = self.tour_flag;                          // 从trainResultShow页面获取
+                	
+                	// Janine20170111修改:车站名称从返回的数据中可以获取，不需要从上一界面传
+//              	FormStation = self.FormStation;
+//                  ToStation =self.ToStation;
+//              	purpose_codes =self.purpose_codes;                   // 从trainResultShow页面获取
+					
+					from_station_name = self.from_station_name;
+					start_time = self.start_time;
+					to_station_name = self.to_station_name;
+					arrive_time = self.arrive_time;
+					station_train_code = self.station_train_code;
+					train_date = self.train_date;
+					lishi = self.lishi;
+					end_train_date = self.end_train_date;
+					seatTicketType = self.seatTicketType;
+					//seatTicketPrice = self.seatTicketPrice;//20170105
+					seatTicketNum = self.seatTicketNum;
+					
+					console.log("Janine:fillOrder.接收到的数据值--->"
+						+ "global:" + gloaled
+						+ ",from_station_name:" + from_station_name 
+						+ ",start_time:" + start_time
+						+ ",to_station_name:" + to_station_name 
+						+ ",arrive_time:" + arrive_time 
+						+ ",station_train_code:" + station_train_code
+						+ ",train_date:" + train_date 
+						+ ",lishi:" + lishi 
+						+ ",end_train_date:" + end_train_date 
+						+ ",seatTicketType:" + seatTicketType 
+						+ ",seatTicketPrice:" + seatTicketPrice
+						+ ",seatTicketNum:" + seatTicketNum
+					);
+					
+					// Janine:填充头部信息之前，测试有没有数据传来
+					Dfrom_station_name.innerHTML = from_station_name;
+					Dstart_time.innerHTML = start_time;
+					Dto_station_name.innerHTML = to_station_name;
+					Darrive_time.innerHTML = arrive_time;
+					Dstation_train_code.innerHTML = station_train_code;
+					Dtrain_date.innerHTML = train_date;
+					Dlishi.innerHTML = lishi;
+					Dend_train_date.innerHTML = end_train_date;
+					DseatTicketType.innerHTML = seatTicketType;
+					//DseatTicketPrice.innerHTML = "¥" + seatTicketPrice;//20170105
+					DseatTicketNum.innerHTML = seatTicketNum + "张";
+					
+//					ajax_getPassCodeNewPassenger({}); // 获取验证码
+				
+					// 点击添加按钮，进入添加界面
+					addButton.addEventListener('tap', function() {
+						// 获取乘客信息
+						ajax_getPassenger({
+							global: gloaled
+						}); // 获取乘客信息
+					});
+					
+					// 获取选择乘客页面的乘客信息
+					window.addEventListener("choosePassengers",function(e){
+						// 得到穿过来的数组
+		    			checkpass = e.detail.checkpass;
+		    			setpassage(checkpass);     // 填充选中的乘客信息
+					});
+					
+					// 删除乘客信息
+					mui('#passmessage').on('tap','.mui-btn-danger',function(){
+						var elem = this;
+						var li = elem.parentNode.parentNode;
+						var idA = li.children[1].children[0];
+						var id = idA.getAttribute('href');
+						// 查询数组删除其中的一项
+						mui.confirm('确认删除？','乘客信息',['确认','取消'],function(e){
+							if (e.index == 0) {
+								li.parentNode.removeChild(li);
+							}else {
+								setTimeout(function() {
+									mui.swipeoutClose(li);
+								}, 0);
+							}
+						});
+					});
+					
+					// 确认购票的点击事件
+					sureButton.addEventListener('tap',function(){
+			    		
+//						ajax_checkForOrder({ // 检测验证码
+//							globaled : gloaled
+//						});
+  
+                        // 检查确认订单
+                        ajax_checkOrderInfo({
+							passengerTicketStr:getPassengerTicketStr(),
+							oldPassengerStr:getOldPassengerStr(),
+							globaled:gloaled,
+							tour_flag : tour_flag
+						}); 	
+
+					},false);
+					
+					
+					
+					// 点击刷新	
+//					touclick.addEventListener('tap', function() {
+//						ajax_getPassCodeNewPassenger({}); // 重新获取验证码
+//					});
+
+				});
+
+				// 设置选择的乘车人信息
+				function setpassage(checkpass){
+					var passmessage = document.getElementById('passmessage');
+					passmessage.innerHTML=' ';
+					var length=checkpass.length-1
+					for(var i = 0;i <= length;i++){
+						console.log(i);
+						var li = document.createElement('li');
+						li.className = 'mui-table-view-cell mui-media';
+						li.innerHTML = '<div class="mui-slider-right mui-disabled"><a class="mui-btn mui-btn-danger">删除</a></div><div class="mui-slider-handle mui-table"><div class="mui-table-cell" style="width: 95%; padding-left: 8px;" ><h5>'
+					        + checkpass[i].name + '\&nbsp;\&nbsp;\&nbsp;\&nbsp;\&nbsp;\&nbsp;'
+					        + checkpass[i].type_name + '</h5><h5>'
+					        + checkpass[i].id_type_name +'\&nbsp;\&nbsp;\&nbsp;\&nbsp;\&nbsp;\&nbsp;'
+					        + checkpass[i].id_no + '</h5></div></div>';	                
+						passmessage.appendChild(li);
+					}
+				}
+				
+				// 获取验证码正确
+				function getPassCodeNewSuccess(data) {
+					if (data.flag == true) {
+						dataItem = data.result;
+						// captcha位置显示验证码
+						$("#captcha").attr("src", dataItem.imgUrl);
+						// 将 id 为 touclick-list的元素内容清空
+						$("#touclick-list").empty();
+
+						if (data.randCode != "" && data.randCode != null) {
+							$("#randCode").val(data.randCode);
+							$("#codediv").hide();
+						} else {
+							$("#randCode").val("");
+							$("#codediv").show();
+						}
+					}
+				}
+
+				// 点击验证码
+				function getPos(o, e) {
+					console.log("fillOrder.getPos.进入--->");
+					var x = e.offsetX;
+					var y = e.offsetY;
+					console.log("fillOrder.getPos.x,y--->" + x + "," + y);
+					var len = $(".touclick-hov").length;
+					console.log("fillOrder.getPos.len--->" + len);
+					$("#touclick-list").append("<div class='touclick-hov touclick-bgimg' index='" + len +
+						"' style='left:" + x + "px; top:" + y + "px;' onclick='cancel(" + len + ")'></div>");
+					var xy = $("#randCode").val();
+					console.log("fillOrder.getPos.xy--->" + xy);
+					var temp = x + "," + y;
+					console.log("fillOrder.getPos.temp1--->" + temp);
+					if (xy != "") {
+						temp = xy + "," + temp;
+						console.log("fillOrder.getPos.temp2--->" + temp);
+					}
+					$("#randCode").val(temp);
+				}
+				
+				// 取消点击的验证码
+				function cancel(index) {
+					$("#randCode").val("");
+					var xy = "";
+					$('.touclick-hov').each(function() {
+						var thisIndex = $(this).attr("index");
+						if (index == thisIndex) {
+							$(this).remove();
+						} else {
+							var x = $(this).css("left");
+							var y = $(this).css("top");
+							x = x.substring(0, x.indexOf("px"));
+							y = y.substring(0, y.indexOf("px"));
+							xy += x + "," + y + ",";
+						}
+					});
+					if (xy != "") {
+						xy = xy.substring(0, xy.length - 1);
+						$("#randCode").val(xy);
+					}
+				}
+
+				// 成功获取乘客信息后，跳转页面
+				function getPassengerSuccess(data) {
+					console.log("Janine:getPassengerSuccess.进入--->");
+					console.log("Janine:getPassengerSuccess.message--->" + data.result.status );
+					mui.openWindow({
+						url: 'addPassengers.html',
+						id: 'addPassengers.html',
+						extras:{
+					 		message : data.result, 
+						}
+					});
+				}
+				
+				/**
+				 * Janine:该界面最主要的就是“检查确认订单”——checkOrderInfo.do
+				 * 需要如下参数：
+				 * String passengerTicketStr
+				 * （该字符成的组成格式是：seat_type,0,ticket_type,name,id_type,id_no,mobile_no,N）多个乘客用_隔开，
+				 *其中：
+				 * seat_type：座位类型（-1、无座，1、硬座，2、软座，3、硬卧，4、软卧，6、高级软卧，M、一等座，O、二等座，P、特等座，9、商务座）注意：二等座是大写字母O，不是数字0。
+				 * ticket_type：票种（1、成人票，2、儿童票，3、学生票，4、残军票）
+				 * name：乘客姓名（中文要使用utf-8编码）
+				 * id_type：证件类型（1、二代身份证，B、护照，C、港澳通行证，G、台湾通行证）
+				 * id_no：证件号码
+				 * mobile_no：手机号码（没有就传空字符串）
+				 * String oldPassengerStr
+				 * （该字符成的组成格式是：name,id_type,id_no,passenger_type）这几个字段可从乘客信息里获取，多个乘客用_隔开，（中文要使用utf-8编码）
+				 */
+				// 检测验证码成功后，调用此方法
+				function checkForOrderSuccess(data){
+					console.log("checkForOrderSuccess.进入--->");
+					dataItem = data.result
+					// 假如
+					if(dataItem.data.result == 1){
+						// 检查确认订单
+    					ajax_checkOrderInfo({
+							passengerTicketStr:getPassengerTicketStr(),
+							oldPassengerStr:getOldPassengerStr(),
+							globaled:gloaled,
+							tour_flag : tour_flag
+						}); 	
+					}
+				}
+				
+				// 检查确认订单成功
+				function checkOrderInfoSuccess(data){
+					dataItem =data.result;
+					if(dataItem.data.submitStatus == true){
+						if(tour_flag=="dc"){
+							console.log("checkOrderInfoSuccess.进入--->");
+							ajax_confirmSingleForQueue({
+								key_check_isChange : key_check_isChange,         //（由步骤3.3获取）
+	                			leftTicketStr : leftTicketStr ,                  //（由步骤3.3获取）
+	                			train_location : train_location ,                //（由步骤3.3获取）
+	               	 			passengerTicketStr : getPassengerTicketStr() ,   //（见步骤3.7）
+	                			oldPassengerStr : getOldPassengerStr(),          //（见步骤3.7）
+	              				purpose_codes : getTicket_type(),                
+	                			globaled : gloaled,
+							});    
+						}else if(tour_flag=="wc"){
+							ajax_confirmGoForQueue({
+								key_check_isChange : key_check_isChange,        
+	                			leftTicketStr : leftTicketStr ,                  
+	                			train_location : train_location ,                
+	               	 			passengerTicketStr : getPassengerTicketStr() ,   
+	                			oldPassengerStr : getOldPassengerStr(),          
+	              				purpose_codes : getTicket_type(),                
+	                			globaled : gloaled,
+							});    
+						}
+						
+					}
+				}
+				
+				// Janine:passengerTicketStr——乘车人的车票信息
+				function getPassengerTicketStr() {
+					
+					// Janine:使用for循环，获取乘车人的购票信息
+					var passengerTicketStr = '';
+					for(i = 0; i < checkpass.length; i++){
+						var it_type = getIt_type();                      // 得到证件类型
+						var seat_type = getSeat_type();                  // 得到车票座位类型
+						var ticket_type = getTicket_type();              // 得到车票类型
+						var name = checkpass[i].name;                    // 得到乘车人姓名
+	    				var id_no = checkpass[i].id_no;                  // 得到乘车人的证件号
+						var mobile_no = checkpass[i].all.mobile_no;      // 得到乘车人的电话
+						
+						// 接口中需要的passengerTicketStr参数
+						passengerTicketStr = passengerTicketStr + seat_type + ",0," + ticket_type + "," + name + "," + it_type + "," + id_no + "," + mobile_no + ",N_";
+						
+					}
+					
+					console.log("Janine:getPassengerTicketStr.passengerTicketStr--->" + passengerTicketStr);
+					
+					if(passengerTicketStr != "") {
+						passengerTicketStr = passengerTicketStr.substring(0, passengerTicketStr.length - 1);
+						console.log("Janine:passengerTicketStr--->" + passengerTicketStr);
+					}
+					return passengerTicketStr;
+				}
+				
+				//  证件类型
+				function getIt_type(){
+					if(checkpass[0].id_type_name == "二代身份证") return "1";
+					if(checkpass[0].id_type_name == "护照") return "B";
+					if(checkpass[0].id_type_name == "港澳通行证") return "C";
+					if(checkpass[0].id_type_name == "台湾通行证") return "G";
+				}
+				
+				// 得到乘车人的车票座位类型
+				function getSeat_type(){
+					if(seatTicketType=="无座") return "-1";
+					if(seatTicketType=="硬座") return "1";
+					if(seatTicketType=="软座") return "2";
+					if(seatTicketType=="硬卧") return "3";
+					if(seatTicketType=="软卧") return "4";
+					if(seatTicketType=="高级软卧") return "6";
+					if(seatTicketType=="一等座") return "M";
+					if(seatTicketType=="二等座") return "O";
+					if(seatTicketType=="特等座") return "P";
+					if(seatTicketType=="商务座") return "9";		
+				}
+				
+				/**
+				 * Janine2017011:此处的数据是从获取乘车人的接口获取，用来做订单检测的checkOrderInfo.do
+				 */
+				function getTicket_type(){
+					if(checkpass[0].type_name=="成人")
+		    			return 1;
+					if(checkpass[0].type_name=="儿童")
+		     			return 2;
+					if(checkpass[0].type_name=="学生")
+		     			return 3;
+					if(checkpass[0].type_name=="残军")
+		     			return 4;
+				}
+				
+				/**
+				 * Janine2017011添加:此处的数据用来向下传输
+				 */
+				function Ticket_type(){
+					if(checkpass[0].type_name=="成人")
+		    			return "ADULT";
+					if(checkpass[0].type_name=="儿童")
+		     			return "";
+					if(checkpass[0].type_name=="学生")
+		     			return "0X00";
+					if(checkpass[0].type_name=="残军")
+		     			return "4";
+				}
+				
+				// 需要乘客信息参数
+				function getOldPassengerStr() {
+					
+					var oldPassengerStr = '';
+					for(i = 0; i < checkpass.length; i++){
+						
+						var name = checkpass[i].name;
+						var id_no = checkpass[i].id_no;
+						var passenger_type = checkpass[i].all.passenger_type;
+						var it_type = getIt_type();
+					
+						oldPassengerStr = oldPassengerStr + name + "," + it_type + "," + id_no + "," + passenger_type + "_";
+					}
+					
+					console.log("Janine:getOldPassengerStr.oldPassengerStr--->" + oldPassengerStr);
+					
+					if(oldPassengerStr != "") {
+						oldPassengerStr = oldPassengerStr.substring(0, oldPassengerStr.length - 1);
+					}
+					return oldPassengerStr;
+				}
+				
+				// 提交订单成功  “dc”
+				function  confirmSingleForQueueSuccess(data){
+					dataItem =data.result;
+					if(dataItem.data.submitStatus == true) {
+						// 查询出票等待时间
+            			ajax_queryOrderWaitTime({
+            				tourFlag : tour_flag,
+            				globaled : gloaled
+           		 		});
+        			}
+				}
+				
+				//提交订单成功  “wc”
+				function confirmGoForQueueSuccess(data){
+					dataItem =data.result;
+					if(dataItem.data.submitStatus == true) {
+						// 查询出票等待时间
+            			ajax_queryOrderWaitTime({
+            				tourFlag : tour_flag,
+            				globaled : gloaled
+           		 		});
+        			}
+				}
+				
+				// 查询出票等待时间成功后，调用该函数
+				function queryOrderWaitTimeSuccess(data){
+					dataItem =data.result;
+					if(dataItem.data.waitTime >= 0) {
+						// 不断地请求，查询出票等待时间，直到waitTime<0
+            			ajax_queryOrderWaitTime({
+            				tourFlag : tour_flag,
+            				globaled : gloaled
+           		 		});
+        		   }else{
+        				// 否则，获取到订单号,将订单号通过resultOrderForDcQueue.do接口，获取订单提交结果
+        				if(tour_flag=="dc"){
+        					ajax_resultOrderForDcQueue({
+	        					orderSequence_no : dataItem.data.orderId,      // 获取到的订单号
+	        					globaled : gloaled                             // 由步骤3.3获取的globalRepeatSubmitToken
+	        				});
+        				}else if(tour_flag=="wc"){
+        					ajax_resultOrderForWcQueue({
+	        					orderSequence_no : dataItem.data.orderId,      // 获取到的订单号
+	        					globaled : gloaled                             
+	        				});
+        				}
+        				
+        			}
+				}
+				
+				// 当获取订单提交的结果正确时，调用该方法  "dc"     
+				function resultOrderForDcQueueSuccess(data){
+					//alert("进入付款！");//20170104
+					// 订单出票成功，进入下一界面，在进入下一页面之前，调用该接口，获取车票和乘客信息。
+					// 网上付款
+					ajax_payOrderInit({
+        				globaled : gloaled                                  // 由步骤3.3获取的globalRepeatSubmitToken
+        			});
+        		}
+				
+				// 当获取订单提交的结果正确时，调用该方法  "wc" 
+				function resultOrderForWcQueueSuccess(data){
+					//alert("进入付款！");//20170104
+					// 订单出票成功，进入下一界面，在进入下一页面之前，调用该接口，获取车票和乘客信息。
+					// 网上付款
+					ajax_payOrderWcInit({
+        				globaled : gloaled                                  // 由步骤3.3获取的globalRepeatSubmitToken
+        			});
+				}
+				
+				// 网上支付初始化  "dc"
+				function payOrderInitSuccess(data){
+					console.log("Janine:付款初始化成功.payOrderInitSuccess.进入--->");
+					console.log("Janine.2017.01.10-payOrderInitSuccess.parOrderDTOJson--->"
+						+ "parOrderDTOJson:" + data.parOrderDTOJson);
+					console.log("Janine.2017.01.10-payOrderInitSuccess.orderRequestDTOJson--->"
+						+ "orderRequestDTOJson:" + data.orderRequestDTOJson);
+					
+					// 然后，进入付款界面,将下一页面，需要的参数传过去，如globaled
+        			ChangePage(data);
+				}
+				
+				// 网上支付初始化  "wc"
+				function payOrderWcInitSuccess(data){
+				
+				    // 然后，进入付款界面,将下一页面，需要的参数传过去，如globaled
+        			ChangePage(data.result);
+				}
+				
+				// 跳转页面
+				function ChangePage(data){
+					
+					mui.openWindow({
+						url: 'payOrder.html',
+						id: 'payOrder.html',
+					 	extras:{
+					 		lishi : self.lishi,                                           // 历时
+					 		start_time : data.ticketForm.start_time,                      // 出发时间
+					 		arrive_time : data.ticketForm.arrive_time,                    // 到达时间
+							station_train_code : data.ticketForm.station_train_code,      // 车次
+							from_station_name : data.ticketForm.from_station_name,        // 出发站
+							to_station_name : data.ticketForm.to_station_name,            // 目的站
+							tour_flag : data.ticketForm.tour_flag,                        // 单程
+							train_date : data.ticketForm.train_date,                      // 乘车日期
+							week : data.ticketForm.week,                                  // 星期
+							passangerForm : data.passangerForm,                           // 乘车人的数组
+							// Janine20170111修改:传的是代码
+							purpose_codes : Ticket_type(),							      // 乘车人类型
+							parOrderDTOJson : data.parOrderDTOJson,	 		  // Janine20170109修改 : 从payOrderInit.do接口中获取
+							orderRequestDTOJson : data.orderRequestDTOJson,   // Janine20170109修改 : 从payOrderInit.do接口中获取
+							
+							// Janine20170111修改
+//							FormStation : FormStation,
+//							ToStation : ToStation,
+					 	} //额外扩展参数
+					});
+				}
+		
+			</script>
+	</body>
+
+</html>

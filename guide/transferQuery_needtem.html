@@ -1,0 +1,278 @@
+<!doctype html>
+<html>
+
+	<head>
+		<meta charset="UTF-8">
+		<title>中转站查询</title>
+		<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+		<link href="../css/mui.min.css" rel="stylesheet" />
+		<style>
+			.mui-btn {
+				width: 100%;
+				height:50px;
+				font-size: 25px;
+			}
+			.button{
+				height:40px;
+				margin-top: 7%;
+				margin-bottom: 7%;
+		    }
+		</style>
+	</head>
+
+	<body>
+		<div class="mui-content">
+		    <ul class="mui-table-view">
+		        <li class="mui-table-view-cell" style="margin-right: 4%;">
+		             <div class="mui-table" style="font-size: 14px;">
+						<div class="mui-table"  >
+							<div class="mui-table-cell mui-col-xs-2">
+								乘车日期：	
+							</div>
+							<div  class="mui-table-cell mui-col-xs-2 " style="">
+								<div style="margin-left: -35%;">
+									<button id="date_time"  style="margin-top: -3%;margin-bottom: -3%;width:80%;">
+										
+									</button>
+								</div>
+						   </div>
+						</div>      
+					   <div  class="mui-table-cell mui-col-xs-2 ">
+							<div style="margin-left:-40%;">中转站：</div>
+						</div>
+						<div  class="mui-table-cell mui-col-xs-2 ">
+							<button id="transfer" style="margin-left: -40%;width: 140%; margin-top:-2%;">石家庄</button>
+					   </div>
+					</div>           
+		        </li>
+		        <li class="mui-table-view-cell" style="margin-right: 4%;">
+		             <div class="mui-table" style="font-size: 14px;">
+						<div  class="mui-table-cell mui-col-xs-2 ">
+							<div >出发地：</div>
+						</div>
+						<div  class="mui-table-cell mui-col-xs-2 ">
+							<button id="start_station_name" style="margin-left: -30%;width: 100%; margin-top:-2%;">合肥</button>
+					  </div>
+					   <div  class="mui-table-cell mui-col-xs-2 ">
+							<div style="margin-left: 10%;">目的地：</div>
+						</div>
+						<div  class="mui-table-cell mui-col-xs-2 ">
+							<button id="end_station_name" style="margin-left: -20%;width: 100%; margin-top:-2%;">北京</button>
+					   </div>
+					</div>           
+		        </li>
+		        
+		        <li class="mui-table-view-cell" style="margin-right: 4%;">
+		            <div class="mui-table" style="font-size: 14px;">
+						<div  class="mui-table-cell mui-col-xs-2 ">
+							<div >验证码：</div>
+						</div>
+						<div  class="mui-table-cell mui-col-xs-2 ">
+							<div class="mui-input-row" style="margin-left: -30%;">
+							    <input id="randCode" type="text"  name="randCode" style="width: 90%; margin-bottom:0%;">
+							</div>
+					    </div>
+					    <div  class="mui-table-cell mui-col-xs-2 ">
+							<div class="mui-input-row" style="margin-left: -0%; width: 80%;">
+							    <img src="" id="captcha" > 
+							</div>
+					    </div>
+					    <div  class="mui-table-cell mui-col-xs-2 " >
+							<div class="mui-input-row" >
+							    <button  id="change" style="font-size: 8px;" >换一张</button>
+							</div>
+					    </div>     
+		       </li>
+		    </ul>
+		    <div class="mui-content-padded" align="center">
+		        <button id="Select" type="button" class="mui-btn mui-btn-blue ">查询</button>
+	        </div>
+		</div>
+		<script src="../js/mui.min.js"></script>
+		<script type="text/javascript" src="../js/guide.js" ></script>
+		<script type="text/javascript" src="../js/jquery-1.11.1.js" ></script>
+		<script type="text/javascript" src="../js/date_time.js" ></script>
+		<script type="text/javascript">
+			mui.init();
+			var date_time;
+			var transfer;
+			var start_station_name;
+			var end_station_name;
+			var randCode;
+			var time;
+			
+			mui.plusReady(function(){
+				
+				ajax_getPassCodeNew({});
+				
+				date_time=document.getElementById("date_time");
+				transfer=document.getElementById("transfer");
+				start_station_name=document.getElementById("start_station_name");
+				end_station_name=document.getElementById("end_station_name");
+				randCode=document.getElementById("randCode");
+				
+				date_time.innerHTML=set_dateTime(get_date_time());
+				
+				//取出本地的存储值并赋值
+				if (localStorage.getItem('transferQuery_start_station_name')) {
+					start_station_name.innerHTML= localStorage.getItem('transferQuery_start_station_name');
+				}
+				if (localStorage.getItem('transferQuery_transfer')) {
+					transfer.innerHTML= localStorage.getItem('transferQuery_transfer');
+				}
+				if (localStorage.getItem('transferQuery_end_station_name')) {
+					end_station_name.innerHTML= localStorage.getItem('transferQuery_end_station_name');
+				}
+				
+				//点击中转站按钮，选择中转站
+				transfer.addEventListener('tap', function() {
+					var address="guide/transferQuery_needtem.html";  // 返回数据时的地址
+					mui.openWindow({
+						url: '../html/station.html',
+						id: 'station',
+						extras: {
+							station: "中转站", //将出发站的title传过去
+							address: address ,
+							title:"中转查询"
+						}
+					});
+				});
+				//点击出发地按钮，选择出发地
+				start_station_name.addEventListener('tap', function() {
+					var address="guide/transferQuery_needtem.html";  // 返回数据时的地址
+					mui.openWindow({
+						url: '../html/station.html',
+						id: 'station',
+						extras: {
+							station: "出发地", //将出发站的title传过去
+							address: address ,
+							title:"中转查询"
+						}
+					});
+				});
+				
+				
+				//点击目的地按钮，选择目的地
+				end_station_name.addEventListener('tap', function() {
+					var address="guide/transferQuery_needtem.html";  // 返回数据时的地址
+					mui.openWindow({
+						url: '../html/station.html',
+						id: 'station',
+						extras: {
+							station: "目的地",   //将出发站的title传过去
+							address: address,  
+							title:"中转查询"
+						}
+					});
+				});
+				
+		        date_time.addEventListener('tap', function() {
+					flag=true;
+					console.log("请选择日期---->"+flag);
+					mui.openWindow({
+						url: '../html/calendar.html',
+						id: '../html/calendar.html',
+						extras:{
+							data : "guide/transferQuery_needtem.html",
+							title:"中转查询",
+						}
+				    });
+				});
+				
+				//接收数据
+				var currentWebview = plus.webview.currentWebview();
+				var parentWebview = currentWebview.parent();
+				mui.fire(parentWebview ,'getCategoryID',{});
+				window.addEventListener('postCategoryID',function(e){
+				    console.log(e.detail.data_time);
+				    console.log(typeof e.detail.data_time);
+				    if(typeof(e.detail.data_time)!="undefined")
+					    date_time.innerHTML=set_dateTime(e.detail.data_time);
+					if(typeof(e.detail.station_name)!="undefined"){  //如果在选择车站时，没有点击任何时间值，则返回的值为空
+		                if(e.detail.title_name=="出发地"){
+		                	start_station_name.innerHTML=e.detail.station_name;
+		                	localStorage.setItem('transferQuery_start_station_name',e.detail.station_name);
+		                }else if(e.detail.title_name=="目的地"){
+		                	end_station_name.innerHTML=e.detail.station_name;
+		                	localStorage.setItem('transferQuery_end_station_name',e.detail.station_name);
+		                }else if(e.detail.title_name=="中转站"){
+		                	transfer.innerHTML=e.detail.station_name;
+		                	localStorage.setItem('transferQuery_transfer',e.detail.station_name);
+		                }  
+		           }
+			    });
+			    
+			    
+				var change=document.getElementById("change");
+				//换一张验证码
+				change.addEventListener('tap', function() { 
+					ajax_getPassCodeNew({});
+				});
+				
+				var Select=document.getElementById("Select");
+				//查询按钮
+				Select.addEventListener('tap', function() {
+					ajax_checkForGuide({
+						randCode:randCode.value,
+					}); 
+				}); 
+			})
+			
+			//填充时间
+			function set_dateTime(data){
+				time=data;
+				console.log(data);
+				var list='';
+				list=list+  '<font style="font-size: 14px;">'+data+'</font>'+
+							'<img src="../img/calendar.png" style="margin:-2% 0 -4% 5%; "/>';
+				return list;
+			}
+			
+			//成功获取验证码
+			function getPassCodeNewSuccess(data){
+				console.log("getPassCodeNewSuccess.进入--->");
+				console.log("getPassCodeNewSuccess.JSON.stringify(data)--->" + JSON.stringify(data.result));
+				//captcha位置显示验证码
+				$("#captcha").attr("src", data.result.imgUrl);
+	    	    $("#randCode").val("");					
+			}
+			
+			//成功验证验证码
+			function checkForGuideSuccess(data){
+				console.log("checkForGuideSuccess.进入--->");
+				console.log("checkForGuideSuccess.JSON.stringify(data)--->" + JSON.stringify(data.data.result));
+				if(data.data.result==1){
+					ajax_transferQuery({   //中转站查询
+						queryDate : time,
+                        from_station_name : start_station_name.innerHTML, 
+                        to_station_name : end_station_name.innerHTML,
+                        changeStationText : transfer.innerHTML,
+                        randCode :randCode.value
+					})
+				}
+			}
+			
+			
+			//查询成功
+			function transferQuerySuccess(data){
+				console.log("transferQuerySuccess.进入--->");
+				console.log("transferQuerySuccess.JSON.stringify(data)--->" + JSON.stringify(data));
+				if(data.data.flag!=false){
+					mui.openWindow({
+						url: 'transferQueryDetail.html',
+						id: 'transferQueryDetail.html',
+						extras:{
+							data : data,
+							start_station_name:start_station_name.innerHTML, 
+                            end_station_name:end_station_name.innerHTML,
+                            transfer:transfer.innerHTML,
+						}
+					});
+				}else{
+					alert(data.data.message);
+				}
+			}
+		</script>
+	</body>
+
+</html>
